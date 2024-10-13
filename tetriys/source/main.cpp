@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <Game/Tetriys.h>
+#include <GameApplication.h>
 
 int main()
 {

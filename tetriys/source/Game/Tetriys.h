@@ -1,19 +1,36 @@
 #pragma once
 
-#include <DFW/CoreSystems/ApplicationInstance.h>
+#include <DFW/CoreSystems/Stage/Stage.h>
+
+#include <DFW/Modules/ECS/ECSModule.h>
+
+#include <Game/BlockGrid.h>
 
 namespace Tetriys
 {
-
-	class GameApplication final : public DFW::ApplicationInstance
+	class TetriysGame final : public DFW::StageBase
 	{
 	public:
-		GameApplication() = default;
-		~GameApplication() = default;
+        TetriysGame(std::string const& a_stage_name, bool a_start_disabled = false);
+        virtual ~TetriysGame() = default;
 
-	private:
-		virtual void PreApplicationInit() override;
-		virtual void PostApplicationInit() override;
+        virtual void OnUpdate() override;
+
+        virtual void OnAttached() override;
+        virtual void OnRemoved() override;
+
+    private:
+        BlockGrid _playfield;
+        DFW::Entity _camera_entity;
+
+        void SetupECS();
+        
+        DFW::UniquePtr<DFW::DECS::ECSModule> _ecs;	
+        
+    private:
+        void Debug_CreateXYZAxisOrigin();
+        
+        DFW::Entity _debug_xyz;
 
 	};
 

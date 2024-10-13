@@ -520,5 +520,6 @@ FodyWeavers.xsd
 build
 
 resources/logs
+resources/shaders/**/*.bin
 
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,cmake,visualstudio,visualstudiocode,git
