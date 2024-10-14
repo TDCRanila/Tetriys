@@ -1,11 +1,13 @@
 #pragma once
 
-#include <DFW/Modules/ECS/ECSModule.h>
-#include <DFW/Modules/ECS/Entity.h>
+#include <Game/BlockComponent.h>
 
 #include <DFW/GameWorld/TransformComponent.h>
 #include <DFW/GameWorld/GameObjectTagComponent.h>
 #include <DFW/GameWorld/Graphics/ModelComponent.h>
+
+#include <DFW/Modules/ECS/ECSModule.h>
+#include <DFW/Modules/ECS/Entity.h>
 
 namespace Tetriys
 {
@@ -28,6 +30,7 @@ namespace Tetriys
 
             block.AddComponent<DFW::GameObjectTagComponent>();
             block.AddComponent<DFW::TransformComponent>();
+            block.AddComponent<BlockComponent>();
             auto& model_component = block.AddComponent<DFW::ModelComponent>();
             model_component.mesh = DFW::Debug_CreateBasicCube(DFW::RandomColourRGBA());
 

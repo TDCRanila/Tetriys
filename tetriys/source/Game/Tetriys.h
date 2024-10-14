@@ -21,6 +21,8 @@ namespace Tetriys
 
     private:
         BlockGrid _playfield;
+        DFW::Entity _scrolling_block;
+        
         DFW::Entity _camera_entity;
 
         void SetupECS();

@@ -26,6 +26,23 @@ namespace Tetriys
     void TetriysGame::OnUpdate()
     {
         _ecs->UpdateECS();
+
+        BlockCoordinate new_coord = _scrolling_block.GetComponent<BlockComponent>().grid_coordinate;
+        if (new_coord.x + 1 >= _playfield.block_grid_data.GetWidth())
+        {
+            new_coord.x = 0;
+            
+            if (new_coord.y + 1 >= _playfield.block_grid_data.GetHeight())
+                new_coord.y = 0;
+            else
+                new_coord.y++;
+        }
+        else
+        {
+            new_coord.x++;
+        }
+
+        _playfield.MoveBlockInGrid(_scrolling_block, new_coord, true);
     }
 
     void TetriysGame::OnAttached()
@@ -51,6 +68,8 @@ namespace Tetriys
         }
 
         _playfield.Setup(*_ecs);
+        _scrolling_block = GameObjects::CreateBlockEntity(*_ecs);
+        _playfield.InsertBlockInGrid(_scrolling_block, BlockCoordinate(0, 0), true);
 
     }
 
