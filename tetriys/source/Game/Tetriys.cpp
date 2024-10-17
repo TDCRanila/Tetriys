@@ -42,7 +42,7 @@ namespace Tetriys
             new_coord.x++;
         }
 
-        _playfield.MoveBlockInGrid(_scrolling_block, new_coord, true);
+        _playfield.MoveBlockInGrid(_scrolling_block, new_coord, false);
     }
 
     void TetriysGame::OnAttached()
@@ -68,8 +68,39 @@ namespace Tetriys
         }
 
         _playfield.Setup(*_ecs);
-        _scrolling_block = GameObjects::CreateBlockEntity(*_ecs);
-        _playfield.InsertBlockInGrid(_scrolling_block, BlockCoordinate(0, 0), true);
+        _scrolling_block = GameObjects::CreateBlockEntity(*_ecs, DFW::ColourRGBA::White);
+        _playfield.InsertBlockInGrid(_scrolling_block, BlockCoordinate(0, 0), false);
+        
+
+        DFW::Entity T = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::T);
+        _playfield.InsertTetromino(T, BlockCoordinate(5, 19));
+        _playfield.RotateTetromino(T, TetrominoRotation::Clockwise);
+        _playfield.RotateTetromino(T, TetrominoRotation::Clockwise);
+        _playfield.TranslateTetromino(T, BlockCoordinate(2, 0));
+
+        DFW::Entity I = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::I);
+        _playfield.InsertTetromino(I, BlockCoordinate(5, 15));
+        _playfield.TranslateTetromino(I, BlockCoordinate(-2, 0));
+        _playfield.RotateTetromino(I, TetrominoRotation::Clockwise);
+        _playfield.TranslateTetromino(I, BlockCoordinate(1, 1));
+
+        DFW::Entity O = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::O);
+        _playfield.InsertTetromino(O, BlockCoordinate(5, 11));
+        _playfield.RotateTetromino(O, TetrominoRotation::Clockwise180);
+
+        DFW::Entity J = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::J);
+        _playfield.InsertTetromino(J, BlockCoordinate(2, 10));
+
+        DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
+        _playfield.InsertTetromino(L, BlockCoordinate(8, 10));
+
+        DFW::Entity Z = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::Z);
+        _playfield.InsertTetromino(Z, BlockCoordinate(2, 5));
+        _playfield.RotateTetromino(Z, TetrominoRotation::Clockwise180);
+
+        DFW::Entity S = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::S);
+        _playfield.InsertTetromino(S, BlockCoordinate(8, 5));
+        _playfield.MoveTetromino(S, BlockCoordinate(8, 4));
 
     }
 

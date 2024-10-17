@@ -16,6 +16,7 @@ namespace Tetriys
     struct DataEntry
     {
         void SyncBlockEntity();
+        void ClearBlockEntity();
         void DestroyBlockEntity();
 
         glm::vec3 block_world_start_position;
@@ -24,17 +25,36 @@ namespace Tetriys
 
     };
 
+    enum class TetrominoRotation
+    {
+        None,
+        Clockwise,
+        CounterClockwise,
+        Clockwise180
+    };
+
     class BlockGrid
     {
     public:
+        void InsertTetromino(DFW::Entity& a_tetromino, BlockCoordinate const a_coordinate);
+        void DestroyTetromino(DFW::Entity& a_tetromino);
+        void RemoveTetromino(DFW::Entity& a_tetromino);
+        void MoveTetromino(DFW::Entity& a_tetromino, BlockCoordinate const a_coordinate);
+        void TranslateTetromino(DFW::Entity& a_tetromino, BlockCoordinate const a_coordinate_offset);
+        void RotateTetromino(DFW::Entity& a_tetromino, TetrominoRotation const& a_rotation);
+
+    public:
         void Setup(DFW::DECS::ECSModule& a_ecs);
 
-        void InsertBlockInGrid(DFW::Entity a_block, BlockCoordinate const a_coordinate, bool a_override_block);
+        void InsertBlockInGrid(DFW::Entity const& a_block, BlockCoordinate const a_coordinate, bool a_override_block);
 
-        void RemoveBlockInGrid(DFW::Entity a_block);
+        void DestroyBlockInGrid(DFW::Entity& a_block);
+        void DestroyBlockInGrid(BlockCoordinate const a_coordinate);
+
+        void RemoveBlockInGrid(DFW::Entity& a_block);
         void RemoveBlockInGrid(BlockCoordinate const a_coordinate);
 
-        void MoveBlockInGrid(DFW::Entity a_block, BlockCoordinate const a_new_coordinate, bool a_override_block);
+        void MoveBlockInGrid(DFW::Entity& a_block, BlockCoordinate const a_new_coordinate, bool a_override_block);
         void MoveBlockInGrid(BlockCoordinate const a_current_coordinate, BlockCoordinate const a_new_coordinate, bool a_override_block);
         
         DFW::DUtility::StaticGrid2D<DataEntry, TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT> block_grid_data;
