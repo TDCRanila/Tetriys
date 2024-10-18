@@ -66,8 +66,14 @@ namespace Tetriys
 
         // Check if at new coordinates there are blocking blocks.
         bool can_tetromino_be_moved(true);
-        for (BlockCoordinate coordinate : new_grid_coordinates)
+        for (BlockCoordinate const& coordinate : new_grid_coordinates)
         {
+            if (!IsValidCoordinate(coordinate))
+            {
+                can_tetromino_be_moved = false;
+                break;
+            }
+
             DataEntry& data_entry = block_grid_data.Get(coordinate.x, coordinate.y);
 
             // Check for blocks other than the blocks of the tetromino.
@@ -146,6 +152,12 @@ namespace Tetriys
         bool can_tetromino_be_rotated(true);
         for (BlockCoordinate coordinate : new_grid_coordinates)
         {
+            if (!IsValidCoordinate(coordinate))
+            {
+                can_tetromino_be_rotated = false;
+                break;
+            }
+
             DataEntry& data_entry = block_grid_data.Get(coordinate.x, coordinate.y);
             
             // Check for blocks other than the blocks of the tetromino.
@@ -251,6 +263,11 @@ namespace Tetriys
         data_entry_at_new_coordinate.SyncBlockEntity();
 
         data_entry.block = DFW::Entity();
+    }
+
+    bool BlockGrid::IsValidCoordinate(BlockCoordinate const a_coordinate)
+    {
+        return block_grid_data.IsValidCoordinate(a_coordinate.x, a_coordinate.y);
     }
 
 } // End of namespace ~ Tetriys.

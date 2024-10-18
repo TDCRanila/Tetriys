@@ -5,7 +5,7 @@
 #include <DFW/GameWorld/Transform.h>
 
 #include <DFW/Modules/ECS/Entity.h>
-#include <DFW/Utility/Grid/Grid2D.h>
+#include <DFW/Utility/Grid/StaticGrid2D.h>
 
 namespace Tetriys
 {
@@ -57,6 +57,8 @@ namespace Tetriys
         void MoveBlockInGrid(DFW::Entity& a_block, BlockCoordinate const a_new_coordinate, bool a_override_block);
         void MoveBlockInGrid(BlockCoordinate const a_current_coordinate, BlockCoordinate const a_new_coordinate, bool a_override_block);
         
+        bool IsValidCoordinate(BlockCoordinate const a_coordinate);
+
         DFW::DUtility::StaticGrid2D<DataEntry, TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT> block_grid_data;
         DFW::Entity entity_root;
 
