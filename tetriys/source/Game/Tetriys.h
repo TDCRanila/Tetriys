@@ -21,7 +21,7 @@ namespace Tetriys
 
     private:
         PlayField _playfield;
-        DFW::Entity _scrolling_block;
+        DFW::Entity _possessed_block;
         
         DFW::Entity _camera_entity;
 

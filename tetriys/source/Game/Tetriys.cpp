@@ -1,9 +1,6 @@
 #include <Game/Tetriys.h>
 
-#include <DFW/CoreSystems/Logging/Logger.h>
-
-#include <DFW/Modules/ECS/Managers/SystemManager.h>
-#include <DFW/Modules/Resource/Mesh/MeshLoader.h>
+#include <Game/GameObjects.h>
 
 #include <DFW/GameWorld/Camera/CameraSystem.h>
 #include <DFW/GameWorld/Camera/CameraComponent.h>
@@ -11,10 +8,13 @@
 #include <DFW/GameWorld/Graphics/DebugRenderSystem.h>
 #include <DFW/GameWorld/TransformSystem.h>
 
-#include <DFW/Utility/Grid/Grid2D.h>
-#include <DFW/Utility/FilePath.h>
+#include <DFW/CoreSystems/Logging/Logger.h>
+#include <DFW/CoreSystems/Input/InputManagement.h>
 
-#include <Game/GameObjects.h>
+#include <DFW/Modules/ECS/Managers/SystemManager.h>
+#include <DFW/Modules/Resource/Mesh/MeshLoader.h>
+
+#include <DFW/Utility/FilePath.h>
 
 namespace Tetriys
 {
@@ -25,24 +25,44 @@ namespace Tetriys
 
     void TetriysGame::OnUpdate()
     {
+        auto input_system = DFW::CoreService::GetInputManagement();
+        if (input_system->IsKeyPressed(DFW::DInput::DKey::A) || input_system->IsKeyRepeated(DFW::DInput::DKey::A))
+        {
+            _playfield.TranslateTetromino(_possessed_block, BlockCoordinate(-1, 0));
+        }
+        else if (input_system->IsKeyPressed(DFW::DInput::DKey::D) || input_system->IsKeyRepeated(DFW::DInput::DKey::D))
+        {
+            _playfield.TranslateTetromino(_possessed_block, BlockCoordinate(1, 0));
+        }
+
+        if (input_system->IsKeyPressed(DFW::DInput::DKey::W) || input_system->IsKeyRepeated(DFW::DInput::DKey::W))
+        {
+            _playfield.TranslateTetromino(_possessed_block, BlockCoordinate(0, 1));
+        } 
+        else if (input_system->IsKeyPressed(DFW::DInput::DKey::S) || input_system->IsKeyRepeated(DFW::DInput::DKey::S))
+        {
+            _playfield.TranslateTetromino(_possessed_block, BlockCoordinate(0, -1));
+        }
+
+        if (input_system->IsKeyPressed(DFW::DInput::DKey::F))
+        {
+            _playfield.RotateTetromino(_possessed_block, TetrominoRotation::CounterClockwise);
+        }
+        else if (input_system->IsKeyPressed(DFW::DInput::DKey::G))
+        {
+            _playfield.RotateTetromino(_possessed_block, TetrominoRotation::Clockwise);
+        }
+        else if (input_system->IsKeyPressed(DFW::DInput::DKey::V))
+        {
+            _playfield.RotateTetromino(_possessed_block, TetrominoRotation::Clockwise180);
+        }
+
+        if (input_system->IsKeyPressed(DFW::DInput::DKey::SPACE))
+        {
+            _possessed_block.DestroySelf();
+        }
+
         _ecs->UpdateECS();
-
-        BlockCoordinate new_coord = _scrolling_block.GetComponent<BlockComponent>().grid_coordinate;
-        if (new_coord.x + 1 >= _playfield.block_grid_data.GetWidth())
-        {
-            new_coord.x = 0;
-            
-            if (new_coord.y + 1 >= _playfield.block_grid_data.GetHeight())
-                new_coord.y = 0;
-            else
-                new_coord.y++;
-        }
-        else
-        {
-            new_coord.x++;
-        }
-
-        _playfield.MoveBlockInGrid(_scrolling_block, new_coord, false);
     }
 
     void TetriysGame::OnAttached()
@@ -67,16 +87,13 @@ namespace Tetriys
             camera_system->EnableCameraControl(camera_component);
         }
 
-        _playfield.Setup(*_ecs);
-        _scrolling_block = GameObjects::CreateBlockEntity(*_ecs, DFW::ColourRGBA::White);
-        _playfield.InsertBlockInGrid(_scrolling_block, BlockCoordinate(0, 0), false);
-        
+        _playfield.Setup(*_ecs);      
 
         DFW::Entity T = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::T);
         _playfield.InsertTetromino(T, BlockCoordinate(5, 19));
-        _playfield.RotateTetromino(T, TetrominoRotation::Clockwise);
-        _playfield.RotateTetromino(T, TetrominoRotation::Clockwise);
-        _playfield.TranslateTetromino(T, BlockCoordinate(2, 0));
+        //_playfield.RotateTetromino(T, TetrominoRotation::Clockwise);
+        //_playfield.RotateTetromino(T, TetrominoRotation::Clockwise);
+        //_playfield.TranslateTetromino(T, BlockCoordinate(2, 0));
 
         DFW::Entity I = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::I);
         _playfield.InsertTetromino(I, BlockCoordinate(5, 15));
@@ -92,6 +109,7 @@ namespace Tetriys
         _playfield.InsertTetromino(J, BlockCoordinate(2, 10));
 
         DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
+        _possessed_block = L;
         _playfield.InsertTetromino(L, BlockCoordinate(8, 10));
 
         DFW::Entity Z = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::Z);
