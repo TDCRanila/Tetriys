@@ -13,7 +13,7 @@ namespace Tetriys
     void DataEntry::SyncBlockEntity()
     {
         DFW::TransformComponent& block_transform = block.GetComponent<DFW::TransformComponent>();
-        block_transform.SetTranslation(block_world_start_position);
+        block_transform.SetTranslation(block_world_position);
 
         BlockComponent& block_component = block.GetComponent<BlockComponent>();
         block_component.grid_coordinate = grid_coordinate;
@@ -30,7 +30,7 @@ namespace Tetriys
         block = DFW::Entity();
     }
 
-    void BlockGrid::InsertTetromino(DFW::Entity& a_tetromino, BlockCoordinate const a_coordinate)
+    void BlockGrid::InsertTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
@@ -51,7 +51,7 @@ namespace Tetriys
             RemoveBlockInGrid(tetromino.block_components[index]->grid_coordinate);
     }
 
-    void BlockGrid::MoveTetromino(DFW::Entity& a_tetromino, BlockCoordinate const a_coordinate)
+    void BlockGrid::MoveTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
 
@@ -68,13 +68,13 @@ namespace Tetriys
         bool can_tetromino_be_moved(true);
         for (BlockCoordinate const& coordinate : new_grid_coordinates)
         {
-            if (!IsValidCoordinate(coordinate))
+            if (!IsValidGridCoordinate(coordinate))
             {
                 can_tetromino_be_moved = false;
                 break;
             }
 
-            DataEntry& data_entry = block_grid_data.Get(coordinate.x, coordinate.y);
+            DataEntry& data_entry = GetDataEntry(coordinate);
 
             // Check for blocks other than the blocks of the tetromino.
             if (data_entry.block.IsEntityValid() && !data_entry.block.IsChildOfEntity(a_tetromino))
@@ -100,7 +100,7 @@ namespace Tetriys
         }
     }
 
-    void BlockGrid::TranslateTetromino(DFW::Entity& a_tetromino, BlockCoordinate const a_coordinate_offset)
+    void BlockGrid::TranslateTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate_offset)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         MoveTetromino(a_tetromino, tetromino.block_components[tetromino.origin_block_index]->grid_coordinate + a_coordinate_offset);
@@ -150,15 +150,15 @@ namespace Tetriys
 
         // Check if at new coordinates there are blocking blocks.
         bool can_tetromino_be_rotated(true);
-        for (BlockCoordinate coordinate : new_grid_coordinates)
+        for (BlockCoordinate const& coordinate : new_grid_coordinates)
         {
-            if (!IsValidCoordinate(coordinate))
+            if (!IsValidGridCoordinate(coordinate))
             {
                 can_tetromino_be_rotated = false;
                 break;
             }
 
-            DataEntry& data_entry = block_grid_data.Get(coordinate.x, coordinate.y);
+            DataEntry& data_entry = GetDataEntry(coordinate);
             
             // Check for blocks other than the blocks of the tetromino.
             if (data_entry.block.IsEntityValid() && !data_entry.block.IsChildOfEntity(a_tetromino))
@@ -192,17 +192,17 @@ namespace Tetriys
     {
         entity_root = GameObjects::CreateGameObject(a_ecs);
 
-        for (size_t index(0); index < block_grid_data.data.size(); index++)
+        for (size_t index(0); index < data.size(); index++)
         {
-            DataEntry& data_entry = block_grid_data.data[index];
-            data_entry.grid_coordinate = glm::ivec2(block_grid_data.GetXCoordinate(index), block_grid_data.GetYCoordinate(index));
-            data_entry.block_world_start_position = glm::vec3(data_entry.grid_coordinate.x * TETRIYS_BLOCK_SPACING, data_entry.grid_coordinate.y * TETRIYS_BLOCK_SPACING, 0.0f);
+            DataEntry& data_entry = data[index];
+            data_entry.grid_coordinate = glm::ivec2(GetXCoordinate(index), GetYCoordinate(index));
+            data_entry.block_world_position = glm::vec3(data_entry.grid_coordinate.x * TETRIYS_BLOCK_SPACING, data_entry.grid_coordinate.y * TETRIYS_BLOCK_SPACING, 0.0f);
         }
     }
 
-    void BlockGrid::InsertBlockInGrid(DFW::Entity const& a_block, BlockCoordinate const a_coordinate, bool const a_override_block)
+    void BlockGrid::InsertBlockInGrid(DFW::Entity const& a_block, BlockCoordinate const& a_coordinate, bool const a_override_block)
     {
-        DataEntry& data_entry = block_grid_data.Get(a_coordinate.x, a_coordinate.y);
+        DataEntry& data_entry = GetDataEntry(a_coordinate);
 
         if (data_entry.block.IsEntityValid())
         {
@@ -221,9 +221,9 @@ namespace Tetriys
         DestroyBlockInGrid(a_block.GetComponent<BlockComponent>().grid_coordinate);
     }
     
-    void BlockGrid::DestroyBlockInGrid(BlockCoordinate const a_coordinate)
+    void BlockGrid::DestroyBlockInGrid(BlockCoordinate const& a_coordinate)
     {
-        block_grid_data.Get(a_coordinate.x, a_coordinate.y).DestroyBlockEntity();
+        GetDataEntry(a_coordinate).DestroyBlockEntity();
     }
 
     void BlockGrid::RemoveBlockInGrid(DFW::Entity& a_block)
@@ -231,24 +231,24 @@ namespace Tetriys
         RemoveBlockInGrid(a_block.GetComponent<BlockComponent>().grid_coordinate);
     }
 
-    void BlockGrid::RemoveBlockInGrid(BlockCoordinate const a_coordinate)
+    void BlockGrid::RemoveBlockInGrid(BlockCoordinate const& a_coordinate)
     {
-        block_grid_data.Get(a_coordinate.x, a_coordinate.y).ClearBlockEntity();
+        GetDataEntry(a_coordinate).ClearBlockEntity();
     }
 
-    void BlockGrid::MoveBlockInGrid(DFW::Entity& a_block, BlockCoordinate const a_new_coordinate, bool a_override_block)
+    void BlockGrid::MoveBlockInGrid(DFW::Entity& a_block, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
     {
         MoveBlockInGrid(a_block.GetComponent<BlockComponent>().grid_coordinate, a_new_coordinate, a_override_block);
     }
 
-    void BlockGrid::MoveBlockInGrid(BlockCoordinate const a_current_coordinate, BlockCoordinate const a_new_coordinate, bool a_override_block)
+    void BlockGrid::MoveBlockInGrid(BlockCoordinate const& a_current_coordinate, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
     {
-        DataEntry& data_entry = block_grid_data.Get(a_current_coordinate.x, a_current_coordinate.y);
+        DataEntry& data_entry = GetDataEntry(a_current_coordinate);
         
         if (!data_entry.block.IsEntityValid())
             return; // No valid block to move to new coordinate.
 
-        DataEntry& data_entry_at_new_coordinate = block_grid_data.Get(a_new_coordinate.x, a_new_coordinate.y);
+        DataEntry& data_entry_at_new_coordinate = GetDataEntry(a_new_coordinate);
 
         if (data_entry_at_new_coordinate.block.IsEntityValid())
         {
@@ -263,11 +263,6 @@ namespace Tetriys
         data_entry_at_new_coordinate.SyncBlockEntity();
 
         data_entry.block = DFW::Entity();
-    }
-
-    bool BlockGrid::IsValidCoordinate(BlockCoordinate const a_coordinate)
-    {
-        return block_grid_data.IsValidCoordinate(a_coordinate.x, a_coordinate.y);
     }
 
 } // End of namespace ~ Tetriys.
