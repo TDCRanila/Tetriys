@@ -4,7 +4,7 @@
 
 #include <DFW/Modules/ECS/ECSModule.h>
 
-#include <Game/BlockGrid.h>
+#include <Game/PlayField.h>
 
 namespace Tetriys
 {
