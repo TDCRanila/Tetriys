@@ -13,17 +13,6 @@ namespace Tetriys
     constexpr size_t TETRIYS_GRID_HEIGHT = 40;
     constexpr float32 TETRIYS_BLOCK_SPACING = 2;
 
-    struct DataEntry
-    {
-        void SyncBlockEntity();
-        void ClearBlockEntity();
-        void DestroyBlockEntity();
-
-        glm::vec3 block_world_position;
-        BlockCoordinate grid_coordinate { 0, 0 };
-        DFW::Entity block;
-    };
-
     enum class TetrominoRotation
     {
         None,
@@ -32,7 +21,18 @@ namespace Tetriys
         Clockwise180
     };
 
-    class BlockGrid : public DFW::DUtility::StaticGrid2D<DataEntry, TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT>
+    struct PlayFieldDataEntry
+    {
+        void SyncBlockEntity();
+        void ClearBlockEntity();
+        void DestroyBlockEntity();
+
+        glm::vec3 block_world_position;
+        BlockCoordinate grid_coordinate{ 0, 0 };
+        DFW::Entity block;
+    };
+
+    class PlayField : public DFW::DUtility::StaticGrid2D<PlayFieldDataEntry, TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT>
     {
     public:
         void Setup(DFW::DECS::ECSModule& a_ecs);
@@ -61,8 +61,8 @@ namespace Tetriys
         bool IsValidGridCoordinate(BlockCoordinate const& a_coordinate) const { return IsValidCoordinate(a_coordinate.x, a_coordinate.y); }
 
     private:
-        DataEntry const& GetDataEntry(BlockCoordinate const& a_coordinate) const { return Get(a_coordinate.x, a_coordinate.y); }
-        DataEntry& GetDataEntry(BlockCoordinate const& a_coordinate) { return Get(a_coordinate.x, a_coordinate.y); }
+        PlayFieldDataEntry const& GetDataEntry(BlockCoordinate const& a_coordinate) const { return Get(a_coordinate.x, a_coordinate.y); }
+        PlayFieldDataEntry& GetDataEntry(BlockCoordinate const& a_coordinate) { return Get(a_coordinate.x, a_coordinate.y); }
 
     private:
         DFW::Entity entity_root;

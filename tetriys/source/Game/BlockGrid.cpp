@@ -10,7 +10,7 @@
 
 namespace Tetriys
 {
-    void DataEntry::SyncBlockEntity()
+    void PlayFieldDataEntry::SyncBlockEntity()
     {
         DFW::TransformComponent& block_transform = block.GetComponent<DFW::TransformComponent>();
         block_transform.SetTranslation(block_world_position);
@@ -19,39 +19,39 @@ namespace Tetriys
         block_component.grid_coordinate = grid_coordinate;
     }
 
-    void DataEntry::ClearBlockEntity()
+    void PlayFieldDataEntry::ClearBlockEntity()
     {
         block = DFW::Entity();
     }
 
-    void DataEntry::DestroyBlockEntity()
+    void PlayFieldDataEntry::DestroyBlockEntity()
     {
         block.DestroySelf();
         block = DFW::Entity();
     }
 
-    void BlockGrid::InsertTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
+    void PlayField::InsertTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
             InsertBlockInGrid(tetromino.blocks[index], a_coordinate + tetromino.block_components[index]->local_offset_coordinate, false);
     }
 
-    void BlockGrid::DestroyTetromino(DFW::Entity& a_tetromino)
+    void PlayField::DestroyTetromino(DFW::Entity& a_tetromino)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
             DestroyBlockInGrid(tetromino.block_components[index]->grid_coordinate);
     }
 
-    void BlockGrid::RemoveTetromino(DFW::Entity& a_tetromino)
+    void PlayField::RemoveTetromino(DFW::Entity& a_tetromino)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
             RemoveBlockInGrid(tetromino.block_components[index]->grid_coordinate);
     }
 
-    void BlockGrid::MoveTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
+    void PlayField::MoveTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
 
@@ -74,9 +74,8 @@ namespace Tetriys
                 break;
             }
 
-            DataEntry& data_entry = GetDataEntry(coordinate);
-
             // Check for blocks other than the blocks of the tetromino.
+            PlayFieldDataEntry const& data_entry = GetDataEntry(coordinate);
             if (data_entry.block.IsEntityValid() && !data_entry.block.IsChildOfEntity(a_tetromino))
             {
                 if (!data_entry.block.IsChildOfEntity(a_tetromino))
@@ -100,13 +99,13 @@ namespace Tetriys
         }
     }
 
-    void BlockGrid::TranslateTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate_offset)
+    void PlayField::TranslateTetromino(DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate_offset)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         MoveTetromino(a_tetromino, tetromino.block_components[tetromino.origin_block_index]->grid_coordinate + a_coordinate_offset);
     }
 
-    void BlockGrid::RotateTetromino(DFW::Entity& a_tetromino, TetrominoRotation const& a_rotation)
+    void PlayField::RotateTetromino(DFW::Entity& a_tetromino, TetrominoRotation const& a_rotation)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
 
@@ -158,9 +157,8 @@ namespace Tetriys
                 break;
             }
 
-            DataEntry& data_entry = GetDataEntry(coordinate);
-            
             // Check for blocks other than the blocks of the tetromino.
+            PlayFieldDataEntry const& data_entry = GetDataEntry(coordinate);
             if (data_entry.block.IsEntityValid() && !data_entry.block.IsChildOfEntity(a_tetromino))
             {
                 if (!data_entry.block.IsChildOfEntity(a_tetromino))
@@ -188,21 +186,21 @@ namespace Tetriys
         }
     }
 
-    void BlockGrid::Setup(DFW::DECS::ECSModule& a_ecs)
+    void PlayField::Setup(DFW::DECS::ECSModule& a_ecs)
     {
         entity_root = GameObjects::CreateGameObject(a_ecs);
 
         for (size_t index(0); index < data.size(); index++)
         {
-            DataEntry& data_entry = data[index];
+            PlayFieldDataEntry& data_entry = data[index];
             data_entry.grid_coordinate = glm::ivec2(GetXCoordinate(index), GetYCoordinate(index));
             data_entry.block_world_position = glm::vec3(data_entry.grid_coordinate.x * TETRIYS_BLOCK_SPACING, data_entry.grid_coordinate.y * TETRIYS_BLOCK_SPACING, 0.0f);
         }
     }
 
-    void BlockGrid::InsertBlockInGrid(DFW::Entity const& a_block, BlockCoordinate const& a_coordinate, bool const a_override_block)
+    void PlayField::InsertBlockInGrid(DFW::Entity const& a_block, BlockCoordinate const& a_coordinate, bool const a_override_block)
     {
-        DataEntry& data_entry = GetDataEntry(a_coordinate);
+        PlayFieldDataEntry& data_entry = GetDataEntry(a_coordinate);
 
         if (data_entry.block.IsEntityValid())
         {
@@ -216,39 +214,39 @@ namespace Tetriys
         data_entry.SyncBlockEntity();
     }
 
-    void BlockGrid::DestroyBlockInGrid(DFW::Entity& a_block)
+    void PlayField::DestroyBlockInGrid(DFW::Entity& a_block)
     {
         DestroyBlockInGrid(a_block.GetComponent<BlockComponent>().grid_coordinate);
     }
     
-    void BlockGrid::DestroyBlockInGrid(BlockCoordinate const& a_coordinate)
+    void PlayField::DestroyBlockInGrid(BlockCoordinate const& a_coordinate)
     {
         GetDataEntry(a_coordinate).DestroyBlockEntity();
     }
 
-    void BlockGrid::RemoveBlockInGrid(DFW::Entity& a_block)
+    void PlayField::RemoveBlockInGrid(DFW::Entity& a_block)
     {
         RemoveBlockInGrid(a_block.GetComponent<BlockComponent>().grid_coordinate);
     }
 
-    void BlockGrid::RemoveBlockInGrid(BlockCoordinate const& a_coordinate)
+    void PlayField::RemoveBlockInGrid(BlockCoordinate const& a_coordinate)
     {
         GetDataEntry(a_coordinate).ClearBlockEntity();
     }
 
-    void BlockGrid::MoveBlockInGrid(DFW::Entity& a_block, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
+    void PlayField::MoveBlockInGrid(DFW::Entity& a_block, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
     {
         MoveBlockInGrid(a_block.GetComponent<BlockComponent>().grid_coordinate, a_new_coordinate, a_override_block);
     }
 
-    void BlockGrid::MoveBlockInGrid(BlockCoordinate const& a_current_coordinate, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
+    void PlayField::MoveBlockInGrid(BlockCoordinate const& a_current_coordinate, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
     {
-        DataEntry& data_entry = GetDataEntry(a_current_coordinate);
+        PlayFieldDataEntry& data_entry = GetDataEntry(a_current_coordinate);
         
         if (!data_entry.block.IsEntityValid())
             return; // No valid block to move to new coordinate.
 
-        DataEntry& data_entry_at_new_coordinate = GetDataEntry(a_new_coordinate);
+        PlayFieldDataEntry& data_entry_at_new_coordinate = GetDataEntry(a_new_coordinate);
 
         if (data_entry_at_new_coordinate.block.IsEntityValid())
         {

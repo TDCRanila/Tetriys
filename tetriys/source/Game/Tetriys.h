@@ -20,7 +20,7 @@ namespace Tetriys
         virtual void OnRemoved() override;
 
     private:
-        BlockGrid _playfield;
+        PlayField _playfield;
         DFW::Entity _scrolling_block;
         
         DFW::Entity _camera_entity;
