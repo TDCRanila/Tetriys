@@ -1,13 +1,21 @@
 #pragma once
 
+#include <Game/Control/TetrominoController.h>
+
 #include <DFW/CoreSystems/Stage/Stage.h>
 
 #include <DFW/Modules/ECS/ECSModule.h>
 
-#include <Game/PlayField.h>
+namespace DFW
+{
+    struct ControllerSystem;
+}
 
 namespace Tetriys
 {
+    struct BlockControlSystem;
+    struct TetrominoControlSystem;
+
 	class TetriysGame final : public DFW::StageBase
 	{
 	public:
@@ -20,18 +28,15 @@ namespace Tetriys
         virtual void OnRemoved() override;
 
     private:
-        PlayField _playfield;
-        DFW::Entity _possessed_block;
-        
+        DFW::SharedPtr<TetrominoController> _player_controller;
+        DFW::Entity _player_game;
         DFW::Entity _camera_entity;
 
         void SetupECS();
-        
         DFW::UniquePtr<DFW::DECS::ECSModule> _ecs;	
         
     private:
         void Debug_CreateXYZAxisOrigin();
-        
         DFW::Entity _debug_xyz;
 
 	};

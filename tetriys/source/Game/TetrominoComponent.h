@@ -14,7 +14,7 @@ namespace Tetriys
         None, I, O, J, L, T, S, Z
     };
 
-    struct TetrominoComponent final : DFW::DECS::Component::StrictRegistrar<TetrominoComponent>
+    struct TetrominoComponent final : public DFW::DECS::Component::StrictRegistrar<TetrominoComponent>
     {
         TetrominoComponent();
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Game/PlayField.h>
 #include <Game/BlockComponent.h>
 #include <Game/TetrominoComponent.h>
 
@@ -50,6 +51,26 @@ namespace Tetriys
             tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_ecs, a_tetromino_type);
 
             return tetromino;
+        }
+
+        inline DFW::Entity CreateGameEntry(DFW::DECS::ECSModule& a_ecs, std::string const& a_game_id)
+        {
+            DFW::Entity player_game = a_ecs.Registry().CreateEntity();
+            player_game.SetType<"Tetriys::GameEntry">();
+            player_game.SetName(a_game_id);
+
+            player_game.AddComponent<DFW::GameObjectTagComponent>();
+            player_game.AddComponent<DFW::TransformComponent>();
+            
+            // Playfield
+            PlayField& playfield = player_game.AddComponent<PlayField>();
+            playfield.Setup(a_ecs);
+
+            // Score Component
+            
+            // Playstate
+
+            return player_game;
         }
 
     } // End of namespace ~ GameObjects.
