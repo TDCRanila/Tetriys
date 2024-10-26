@@ -70,7 +70,7 @@ namespace Tetriys
 
             virtual void Execute() override
             {
-                tetromino.get().desired_movement_action.coordinate.y = -1;
+                tetromino.get().wants_to_soft_drop = true;
             }
 
             DFW::RefWrap<TetrominoMovementComponent> tetromino;
@@ -83,7 +83,7 @@ namespace Tetriys
 
             virtual void Execute() override
             {
-                tetromino.get().desired_movement_action.coordinate.y = 1;
+                tetromino.get().wants_to_hard_drop = true;
             }
 
             DFW::RefWrap<TetrominoMovementComponent> tetromino;

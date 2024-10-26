@@ -32,12 +32,12 @@ namespace Tetriys
 
         bool WantsToSoftDrop(TetrominoMovementComponent const& a_tetromino)
         {
-            return a_tetromino.desired_movement_action.coordinate.y == -1.0f;
+            return a_tetromino.wants_to_soft_drop == true;
         }
 
         bool WantsToHardDrop(TetrominoMovementComponent const& a_tetromino)
         {
-            return a_tetromino.desired_movement_action.coordinate.y == 1.0f;
+            return a_tetromino.wants_to_hard_drop == true;
         }
     }
 
@@ -73,6 +73,10 @@ namespace Tetriys
             DFW::Entity entity(e, a_registry);
             PlayField& playfield = playfield_reference.Get();
 
+            tetromino_movement_comp.is_strafing = false;
+            tetromino_movement_comp.is_rotating = false;
+            tetromino_movement_comp.is_dropping = false;
+
             if (Detail::WantsToTeleport(tetromino_movement_comp))
             {
                 MoveTetromino(playfield, entity, tetromino_movement_comp.desired_movement_action.coordinate);
@@ -82,24 +86,28 @@ namespace Tetriys
             if (Detail::WantsToStrafe(tetromino_movement_comp))
             {
                 TranslateTetromino(playfield, entity, tetromino_movement_comp.desired_movement_action.coordinate);
+                tetromino_movement_comp.is_strafing = true;
             }
 
             if (Detail::WantsToRotate(tetromino_movement_comp))
             {
                 RotateTetromino(playfield, entity, tetromino_movement_comp.desired_rotation_action);
+                tetromino_movement_comp.is_rotating= true;
             }
 
             if (Detail::WantsToSoftDrop(tetromino_movement_comp))
             {
                 TranslateTetromino(playfield, entity, tetromino_movement_comp.desired_movement_action.coordinate);
+                tetromino_movement_comp.is_dropping = true;
             }
 
             if (Detail::WantsToHardDrop(tetromino_movement_comp))
             {
                 // TODO
+                // tetromino_movement_comp.is_dropping = true;
             }
 
-            tetromino_movement_comp.Reset();
+            tetromino_movement_comp.ResetActions();
         }
     }
 

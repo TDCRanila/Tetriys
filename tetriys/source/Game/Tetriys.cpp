@@ -1,6 +1,8 @@
 #include <Game/Tetriys.h>
 
 #include <Game/GameObjects.h>
+#include <Game/GameLogicSystem.h>
+#include <Game/GravityComponent.h>
 #include <Game/Control/TetrominoRotation.h>
 #include <Game/Control/PlayFieldControlSystem.h>
 #include <Game/Control/TetrominoControlSystem.h>
@@ -118,6 +120,7 @@ namespace Tetriys
 
         DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
         _player_controller->PossessTetromino(L);
+        L.AddComponent<GravityComponent>();
         tetromino_control_system->InsertTetromino(_playfield, L, BlockCoordinate(8, 10));
 
         DFW::Entity Z = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::Z);
@@ -152,6 +155,7 @@ namespace Tetriys
         auto& tetromino_control_system = _ecs->SystemManager().AddSystem<TetrominoControlSystem>();
         
         auto& controller_system = _ecs->SystemManager().AddSystem<DFW::ControllerSystem>();
+        auto& game_logic_system = _ecs->SystemManager().AddSystem<GameLogicSystem>();
 
         debug_render_system.ExecuteAfter(transform_system);
         render_system.ExecuteAfter(transform_system);
@@ -160,7 +164,8 @@ namespace Tetriys
         camera_system.ExecuteAfter(tetromino_control_system);
 
         tetromino_control_system.ExecuteAfter(playfield_control_system);
-        playfield_control_system.ExecuteAfter(controller_system);
+        playfield_control_system.ExecuteAfter(game_logic_system);
+        game_logic_system.ExecuteAfter(controller_system);
 
         _ecs->SystemManager().CalculateSystemDependencies();
     }
