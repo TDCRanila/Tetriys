@@ -10,6 +10,7 @@
 
 #include <DFW/Modules/ECS/ECSModule.h>
 #include <DFW/Modules/ECS/Entity.h>
+#include <DFW/CoreSystems/Events/EventDispatcher.h>
 
 #include <DFW/Utility/ColourUtility.h>
 
@@ -29,13 +30,12 @@ namespace Tetriys
 
         inline DFW::Entity CreateBlockEntity(DFW::DECS::ECSModule& a_ecs, DFW::ColourRGBA const& a_block_colour)
         {
-            DFW::Entity block = a_ecs.Registry().CreateEntity();
+            DFW::Entity block = CreateGameObject(a_ecs);
             block.SetType<"Tetriys::Block">();
 
-            block.AddComponent<DFW::GameObjectTagComponent>();
-            block.AddComponent<DFW::TransformComponent>();
             block.AddComponent<BlockComponent>();
-            auto& model_component = block.AddComponent<DFW::ModelComponent>();
+
+            DFW::ModelComponent& model_component = block.AddComponent<DFW::ModelComponent>();
             model_component.mesh = DFW::Debug_CreateBasicCube(a_block_colour);
 
             return block;
@@ -43,11 +43,9 @@ namespace Tetriys
 
         inline DFW::Entity CreateTetrominoEntity(DFW::DECS::ECSModule& a_ecs, TetrominoType const& a_tetromino_type)
         {
-            DFW::Entity tetromino = a_ecs.Registry().CreateEntity();
+            DFW::Entity tetromino = CreateGameObject(a_ecs);
             tetromino.SetType<"Tetriys::Tetromino">();
 
-            tetromino.AddComponent<DFW::GameObjectTagComponent>();
-            tetromino.AddComponent<DFW::TransformComponent>();
             tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_ecs, a_tetromino_type);
 
             return tetromino;
@@ -55,19 +53,15 @@ namespace Tetriys
 
         inline DFW::Entity CreateGameEntry(DFW::DECS::ECSModule& a_ecs, std::string const& a_game_id)
         {
-            DFW::Entity player_game = a_ecs.Registry().CreateEntity();
+            DFW::Entity player_game = CreateGameObject(a_ecs);
             player_game.SetType<"Tetriys::GameEntry">();
             player_game.SetName(a_game_id);
 
-            player_game.AddComponent<DFW::GameObjectTagComponent>();
-            player_game.AddComponent<DFW::TransformComponent>();
-            
             // Playfield
             PlayField& playfield = player_game.AddComponent<PlayField>();
             playfield.Setup(a_ecs);
 
             // Score Component
-            
             // Playstate
 
             return player_game;
