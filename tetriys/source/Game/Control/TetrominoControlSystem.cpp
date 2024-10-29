@@ -162,8 +162,7 @@ namespace Tetriys
             PlayFieldDataEntry const& data_entry = a_playfield.GetDataEntry(coordinate);
             if (data_entry.block.IsEntityValid() && !data_entry.block.IsChildOfEntity(a_tetromino))
             {
-                if (!data_entry.block.IsChildOfEntity(a_tetromino))
-                    can_tetromino_be_moved = false;
+                can_tetromino_be_moved = false;
             }
         }
 
