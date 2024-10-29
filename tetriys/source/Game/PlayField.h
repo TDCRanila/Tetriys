@@ -23,6 +23,7 @@ namespace Tetriys
         PlayFieldRef(PlayField& a_playfield_ref) : ptr(&a_playfield_ref) { }
 
         PlayField& Get() { return *ptr; }
+        PlayField const& Get() const { return const_cast<PlayField&>(Get()); }
 
     private:
         PlayField* ptr;

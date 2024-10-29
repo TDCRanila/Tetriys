@@ -3,6 +3,7 @@
 #include <Game/GameObjects.h>
 #include <Game/GameLogicSystem.h>
 #include <Game/GravityComponent.h>
+#include <Game/PlacementComponent.h>
 #include <Game/Control/TetrominoRotation.h>
 #include <Game/Control/PlayFieldControlSystem.h>
 #include <Game/Control/TetrominoControlSystem.h>
@@ -121,6 +122,7 @@ namespace Tetriys
         DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
         _player_controller->PossessTetromino(L);
         L.AddComponent<GravityComponent>();
+        L.AddComponent<PlacementComponent>();
         tetromino_control_system->InsertTetromino(_playfield, L, BlockCoordinate(8, 10));
 
         DFW::Entity Z = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::Z);
