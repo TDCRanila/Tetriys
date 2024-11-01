@@ -4,6 +4,7 @@
 #include <Game/GameLogicSystem.h>
 #include <Game/GravityComponent.h>
 #include <Game/PlacementComponent.h>
+#include <Game/GameControllerSystem.h>
 #include <Game/Control/TetrominoRotation.h>
 #include <Game/Control/PlayFieldControlSystem.h>
 #include <Game/Control/TetrominoControlSystem.h>
@@ -13,10 +14,8 @@
 #include <DFW/GameWorld/Graphics/RenderSystem.h>
 #include <DFW/GameWorld/Graphics/DebugRenderSystem.h>
 #include <DFW/GameWorld/TransformSystem.h>
-#include <DFW/GameWorld/Controller/ControllerSystem.h>
 
 #include <DFW/CoreSystems/Logging/Logger.h>
-#include <DFW/CoreSystems/Input/InputManagement.h>
 
 #include <DFW/Modules/ECS/Managers/SystemManager.h>
 #include <DFW/Modules/Resource/Mesh/MeshLoader.h>
@@ -32,38 +31,6 @@ namespace Tetriys
 
     void TetriysGame::OnUpdate()
     {
-        auto input_system = DFW::CoreService::GetInputManagement();
-
-        if (input_system->IsKeyPressed(DFW::DInput::DKey::A) || input_system->IsKeyRepeated(DFW::DInput::DKey::A))
-        {
-            _player_controller->StrafeHorizontal(BlockCoordinate(-1, 0));
-        }
-        else if (input_system->IsKeyPressed(DFW::DInput::DKey::D) || input_system->IsKeyRepeated(DFW::DInput::DKey::D))
-        {
-            _player_controller->StrafeHorizontal(BlockCoordinate(1, 0));
-        }
-
-        if (input_system->IsKeyPressed(DFW::DInput::DKey::W) || input_system->IsKeyRepeated(DFW::DInput::DKey::W))
-        {
-            _player_controller->StrafeHorizontal(BlockCoordinate(0, 1));
-        } 
-        else if (input_system->IsKeyPressed(DFW::DInput::DKey::S) || input_system->IsKeyRepeated(DFW::DInput::DKey::S))
-        {
-            _player_controller->StrafeHorizontal(BlockCoordinate(0, -1));
-        }
-
-        if (input_system->IsKeyPressed(DFW::DInput::DKey::F))
-        {
-            _player_controller->Rotate(TetrominoRotation::CounterClockwise);
-        }
-        else if (input_system->IsKeyPressed(DFW::DInput::DKey::G))
-        {
-            _player_controller->Rotate(TetrominoRotation::Clockwise);
-        }
-        else if (input_system->IsKeyPressed(DFW::DInput::DKey::V))
-        {
-            _player_controller->Rotate(TetrominoRotation::Clockwise180);
-        }
 
         _ecs->UpdateECS();
     }
@@ -71,9 +38,6 @@ namespace Tetriys
     void TetriysGame::OnAttached()
     {
         SetupECS();
-
-        _player_controller = DFW::MakeShared<TetrominoController>();
-        _ecs->SystemManager().GetSystem<DFW::ControllerSystem>()->RegisterController(_player_controller);
 
         Debug_CreateXYZAxisOrigin();
 
@@ -120,7 +84,7 @@ namespace Tetriys
         tetromino_control_system->InsertTetromino(_playfield, J, BlockCoordinate(2, 10));
 
         DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
-        _player_controller->PossessTetromino(L);
+        _ecs->SystemManager().GetSystem<GameControllerSystem>()->GetController<TetrominoController>("PlayerOne")->PossessTetromino(L);
         L.AddComponent<GravityComponent>();
         L.AddComponent<PlacementComponent>();
         tetromino_control_system->InsertTetromino(_playfield, L, BlockCoordinate(8, 10));
@@ -156,7 +120,7 @@ namespace Tetriys
         auto& playfield_control_system = _ecs->SystemManager().AddSystem<PlayFieldControlSystem>();
         auto& tetromino_control_system = _ecs->SystemManager().AddSystem<TetrominoControlSystem>();
         
-        auto& controller_system = _ecs->SystemManager().AddSystem<DFW::ControllerSystem>();
+        auto& controller_system = _ecs->SystemManager().AddSystem<GameControllerSystem>();
         auto& game_logic_system = _ecs->SystemManager().AddSystem<GameLogicSystem>();
 
         debug_render_system.ExecuteAfter(transform_system);

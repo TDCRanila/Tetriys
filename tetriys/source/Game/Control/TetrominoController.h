@@ -5,7 +5,8 @@
 
 #include <DFW/GameWorld/Controller/BaseController.h>
 
-#include <DFW/Modules/ECS/Entity.h> 
+#include <DFW/Modules/ECS/Entity.h>
+#include <DFW/Modules/ECS/Component.h>
 
 #include <DFW/CoreSystems/Command.h>
 
@@ -13,6 +14,14 @@
 
 namespace Tetriys
 {
+    struct ControllerRef final : public DFW::DECS::Component::StrictRegistrar<ControllerRef>
+    {
+        ControllerRef() = default;
+        ControllerRef(DFW::ControllerNameID const& a_controller_name_id) : controller_name_id(a_controller_name_id) {}
+
+        DFW::ControllerNameID controller_name_id;
+    };
+
     class TetrominoController : public DFW::BaseController
     {
     public:
@@ -22,6 +31,8 @@ namespace Tetriys
         void PossessTetromino(DFW::Entity& a_entity);
         void ReleaseTetromino();
     
+        bool IsPossessing() const { return _possessed_tetromino; }
+
     public:
         void StrafeHorizontal(glm::ivec2 const& a_move_direction);
         void Rotate(TetrominoRotation const& a_rotation);

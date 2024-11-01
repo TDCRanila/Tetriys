@@ -20,22 +20,26 @@ namespace Tetriys
 
     void TetrominoController::StrafeHorizontal(glm::ivec2 const& a_move_direction)
     {
-        QueueAction(new StrafeCommand(*_possessed_tetromino, a_move_direction));
+        if (_possessed_tetromino)
+            QueueAction(DFW::MakeUnique<StrafeCommand>(*_possessed_tetromino, a_move_direction));
     }
 
     void TetrominoController::Rotate(TetrominoRotation const& a_rotation)
     {
-        QueueAction(new RotateCommand(*_possessed_tetromino, a_rotation));
+        if (_possessed_tetromino)
+            QueueAction(DFW::MakeUnique<RotateCommand>(*_possessed_tetromino, a_rotation));
     }
 
     void TetrominoController::SoftDrop()
     {
-        QueueAction(new SoftDropCommand(*_possessed_tetromino));
+        if (_possessed_tetromino)
+            QueueAction(DFW::MakeUnique<SoftDropCommand>(*_possessed_tetromino));
     }
 
     void TetrominoController::HardDrop()
     {
-        QueueAction(new HardDropCommand(*_possessed_tetromino));
+        if (_possessed_tetromino)
+            QueueAction(DFW::MakeUnique<HardDropCommand>(*_possessed_tetromino));
     }
 
 } // End of namespace ~ Tetriys.

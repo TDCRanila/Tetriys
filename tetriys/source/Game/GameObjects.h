@@ -3,6 +3,8 @@
 #include <Game/PlayField.h>
 #include <Game/BlockComponent.h>
 #include <Game/TetrominoComponent.h>
+#include <Game/GameControllerSystem.h>
+#include <Game/Control/TetrominoController.h>
 
 #include <DFW/GameWorld/TransformComponent.h>
 #include <DFW/GameWorld/GameObjectTagComponent.h>
@@ -10,7 +12,7 @@
 
 #include <DFW/Modules/ECS/ECSModule.h>
 #include <DFW/Modules/ECS/Entity.h>
-#include <DFW/CoreSystems/Events/EventDispatcher.h>
+#include <DFW/Modules/ECS/Managers/SystemManager.h>
 
 #include <DFW/Utility/ColourUtility.h>
 
@@ -60,6 +62,10 @@ namespace Tetriys
             // Playfield
             PlayField& playfield = player_game.AddComponent<PlayField>();
             playfield.Setup(a_ecs);
+
+            // Controller
+            a_ecs.SystemManager().GetSystem<GameControllerSystem>()->ConstructController<TetrominoController>(DFW::ControllerNameID(a_game_id));
+            player_game.AddComponent<ControllerRef>(DFW::ControllerNameID(a_game_id));
 
             // Score Component
             // Playstate
