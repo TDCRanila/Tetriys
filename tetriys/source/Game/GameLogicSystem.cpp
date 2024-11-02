@@ -5,15 +5,16 @@
 #include <Game/BlockComponent.h>
 #include <Game/PlacementComponent.h>
 #include <Game/GravityComponent.h>
+#include <Game/GameEvents.h>
 #include <Game/Control/TetrominoMovementComponent.h>
 #include <Game/Control/PlayfieldActions.h>
 
 #include <DFW/GameWorld/TransformComponent.h>
-
 #include <DFW/Modules/ECS/Entity.h>
 #include <DFW/Modules/ECS/Managers/EntityRegistry.h>
 
 #include <DFW/CoreSystems/CoreServices.h>
+#include <DFW/CoreSystems/Events/EventDispatcher.h>
 
 namespace Tetriys
 {
@@ -124,6 +125,8 @@ namespace Tetriys
                     entity.DeleteComponent<TetrominoMovementComponent>();
                     entity.DeleteComponent<GravityComponent>();
                     entity.DeleteComponent<PlacementComponent>();
+
+                    ECSEventHandler().Broadcast<TetrominoPlacedEvent>(entity);
                 }
 
                 placement_component.current_placement_time += _game_clock->GetLastFrameDeltaTime();

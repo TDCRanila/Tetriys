@@ -85,6 +85,7 @@ namespace Tetriys
 
         DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
         _ecs->SystemManager().GetSystem<GameControllerSystem>()->GetController<TetrominoController>("PlayerOne")->PossessTetromino(L);
+        L.AddComponent<TetrominoMovementComponent>();
         L.AddComponent<GravityComponent>();
         L.AddComponent<PlacementComponent>();
         tetromino_control_system->InsertTetromino(_playfield, L, BlockCoordinate(8, 10));

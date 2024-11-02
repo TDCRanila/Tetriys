@@ -2,8 +2,6 @@
 
 #include <DFW/GameWorld/Controller/ControllerSystem.h>
 
-#include <DFW/Modules/ECS/Entity.h>
-
 namespace DFW
 {
     namespace DECS
@@ -15,6 +13,8 @@ namespace DFW
 
 namespace Tetriys
 {
+    struct TetrominoPlacedEvent;
+
     class GameControllerSystem : public DFW::DECS::System::Registrar<GameControllerSystem, DFW::ControllerSystem>
     {
     public:
@@ -22,7 +22,12 @@ namespace Tetriys
         virtual ~GameControllerSystem() = default;
 
     private:
+        virtual void Init(DFW::DECS::EntityRegistry& a_registry) override;
+        virtual void Terminate(DFW::DECS::EntityRegistry& a_registry) override;
         virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
+
+    private:
+        void OnTetrominoPlacedEvent(TetrominoPlacedEvent const& a_event);
 
     };
 
