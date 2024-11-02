@@ -32,8 +32,6 @@ namespace Tetriys
 
     void PlayField::Setup(DFW::DECS::ECSModule& a_ecs)
     {
-        playfield_root = GameObjects::CreateGameObject(a_ecs);
-
         for (size_t index(0); index < data.size(); index++)
         {
             PlayFieldDataEntry& data_entry = data[index];

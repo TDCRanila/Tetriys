@@ -50,8 +50,6 @@ namespace Tetriys
         PlayFieldDataEntry& GetDataEntry(BlockCoordinate const& a_coordinate) { return Get(a_coordinate.x, a_coordinate.y); }
         bool IsValidGridCoordinate(BlockCoordinate const& a_coordinate) const { return IsValidCoordinate(a_coordinate.x, a_coordinate.y); }
 
-        DFW::Entity playfield_root;
-
     };
 
 } // End of namespace ~ Tetriys.
