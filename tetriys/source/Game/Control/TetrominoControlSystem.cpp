@@ -76,34 +76,40 @@ namespace Tetriys
             tetromino_movement_comp.is_strafing = false;
             tetromino_movement_comp.is_rotating = false;
             tetromino_movement_comp.is_dropping = false;
+            tetromino_movement_comp.has_moved = false;
 
             if (Detail::WantsToTeleport(tetromino_movement_comp))
             {
                 MoveTetromino(playfield, entity, tetromino_movement_comp.desired_movement_action.coordinate);
+                tetromino_movement_comp.has_moved = true;
                 break;
             }
 
             if (Detail::WantsToStrafe(tetromino_movement_comp))
             {
                 TranslateTetromino(playfield, entity, tetromino_movement_comp.desired_movement_action.coordinate);
+                tetromino_movement_comp.has_moved = true;
                 tetromino_movement_comp.is_strafing = true;
             }
 
             if (Detail::WantsToRotate(tetromino_movement_comp))
             {
                 RotateTetromino(playfield, entity, tetromino_movement_comp.desired_rotation_action);
+                tetromino_movement_comp.has_moved = true;
                 tetromino_movement_comp.is_rotating= true;
             }
 
             if (Detail::WantsToSoftDrop(tetromino_movement_comp))
             {
                 TranslateTetromino(playfield, entity, tetromino_movement_comp.desired_movement_action.coordinate);
+                tetromino_movement_comp.has_moved = true;
                 tetromino_movement_comp.is_dropping = true;
             }
 
             if (Detail::WantsToHardDrop(tetromino_movement_comp))
             {
                 // TODO
+                // tetromino_movement_comp.has_moved = true;
                 // tetromino_movement_comp.is_dropping = true;
             }
 

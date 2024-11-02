@@ -18,6 +18,7 @@ namespace Tetriys
             , is_strafing(false)
             , is_rotating(false)
             , is_dropping(false)
+            , has_moved(false)
         { }
 
         void ResetActions() 
@@ -36,6 +37,8 @@ namespace Tetriys
         bool is_strafing;
         bool is_rotating;
         bool is_dropping;
+        bool has_moved;
+
     };
 
 } // End of namespace ~ Tetriys.

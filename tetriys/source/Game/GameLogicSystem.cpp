@@ -111,14 +111,15 @@ namespace Tetriys
 
     void GameLogicSystem::ExecuteTetrominoPlacementChecks(DFW::DECS::EntityRegistry& a_registry)
     {
-        for (auto&& [e, placement_component, tetromino_component, playfield_ref] : a_registry.ENTT().view<PlacementComponent, TetrominoComponent, PlayFieldRef>().each())
+        for (auto&& [e, placement_comp, tetromino_movement_comp, tetromino_comp, playfield_ref] 
+            : a_registry.ENTT().view<PlacementComponent, TetrominoMovementComponent, TetrominoComponent, PlayFieldRef>().each())
         {
-            BlockCoordinate const& tetromino_coordinate = tetromino_component.block_components[tetromino_component.origin_block_index]->grid_coordinate;
-            placement_component.check_placement_time = IsTetrominoBlockedAtCoordinate(tetromino_component, playfield_ref.Get(), tetromino_coordinate + TETRIYS_GRAVITY_TICK);
+            BlockCoordinate const& tetromino_coordinate = tetromino_comp.block_components[tetromino_comp.origin_block_index]->grid_coordinate;
+            placement_comp.check_placement_time = IsTetrominoBlockedAtCoordinate(tetromino_comp, playfield_ref.Get(), tetromino_coordinate + TETRIYS_GRAVITY_TICK);
 
-            if (placement_component.check_placement_time)
+            if (placement_comp.check_placement_time && !tetromino_movement_comp.has_moved)
             {
-                bool const lock_tetromino_in_place = placement_component.current_placement_time >= placement_component.max_placement_time;
+                bool const lock_tetromino_in_place = placement_comp.current_placement_time >= placement_comp.max_placement_time;
                 if (lock_tetromino_in_place)
                 {
                     DFW::Entity entity(e, a_registry);
@@ -129,11 +130,11 @@ namespace Tetriys
                     ECSEventHandler().Broadcast<TetrominoPlacedEvent>(entity);
                 }
 
-                placement_component.current_placement_time += _game_clock->GetLastFrameDeltaTime();
+                placement_comp.current_placement_time += _game_clock->GetLastFrameDeltaTime();
             }
             else
             {
-                placement_component.current_placement_time = 0;
+                placement_comp.current_placement_time = 0;
             }
 
         }
