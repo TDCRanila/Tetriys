@@ -14,6 +14,7 @@ namespace DFW
 namespace Tetriys
 {
     struct TetrominoPlacedEvent;
+    struct TetrominoSpawnedEvent;
 
     class GameControllerSystem : public DFW::DECS::System::Registrar<GameControllerSystem, DFW::ControllerSystem>
     {
@@ -27,8 +28,8 @@ namespace Tetriys
         virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
 
     private:
-        void OnTetrominoPlacedEvent(TetrominoPlacedEvent const& a_event);
-
+        void OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event);
+        void OnTetrominoSpawnedEvent(TetrominoSpawnedEvent& a_event);
     };
 
 } // End of namespace ~ Tetriys.

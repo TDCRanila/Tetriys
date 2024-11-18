@@ -12,7 +12,74 @@
 
 namespace Tetriys
 {
-    void PlayFieldControlSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    void InsertBlockInGrid(PlayField& a_playfield, DFW::Entity const& a_block, BlockCoordinate const& a_coordinate, bool const a_override_block)
+    {
+        PlayFieldDataEntry& data_entry = a_playfield.GetDataEntry(a_coordinate);
+
+        if (data_entry.block.IsEntityValid())
+        {
+            if (a_override_block)
+                data_entry.DestroyBlockEntity();
+            else
+                return; // Can't override block, as a valid block in the way.
+        }
+
+        data_entry.block = a_block;
+        data_entry.SyncBlockEntity();
+
+        data_entry.block.AddComponent<PlayFieldRef>(a_playfield);
+    }
+
+    void DestroyBlockInGrid(PlayField& a_playfield, DFW::Entity& a_block)
+    {
+        DestroyBlockInGrid(a_playfield, a_block.GetComponent<BlockComponent>().grid_coordinate);
+    }
+
+    void DestroyBlockInGrid(PlayField& a_playfield, BlockCoordinate const& a_coordinate)
+    {
+        a_playfield.GetDataEntry(a_coordinate).DestroyBlockEntity();
+    }
+
+    void RemoveBlockInGrid(PlayField& a_playfield, DFW::Entity& a_block)
+    {
+        RemoveBlockInGrid(a_playfield, a_block.GetComponent<BlockComponent>().grid_coordinate);
+    }
+
+    void RemoveBlockInGrid(PlayField& a_playfield, BlockCoordinate const& a_coordinate)
+    {
+        a_playfield. GetDataEntry(a_coordinate).ClearBlockEntity();
+    }
+
+    void MoveBlockInGrid(PlayField& a_playfield, DFW::Entity& a_block, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
+    {
+        MoveBlockInGrid(a_playfield, a_block.GetComponent<BlockComponent>().grid_coordinate, a_new_coordinate, a_override_block);
+    }
+
+    void MoveBlockInGrid(PlayField& a_playfield, BlockCoordinate const& a_current_coordinate, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
+    {
+        PlayFieldDataEntry& data_entry = a_playfield.GetDataEntry(a_current_coordinate);
+
+        if (!data_entry.block.IsEntityValid())
+            return; // No valid block to move to new coordinate.
+
+        PlayFieldDataEntry& data_entry_at_new_coordinate = a_playfield.GetDataEntry(a_new_coordinate);
+
+        if (data_entry_at_new_coordinate.block.IsEntityValid())
+        {
+            if (a_override_block)
+                data_entry_at_new_coordinate.DestroyBlockEntity();
+            else
+                return; // Can't override block, as a valid block in the way.
+        }
+
+        // Move block entity to new data_entry.
+        data_entry_at_new_coordinate.block = data_entry.block;
+        data_entry_at_new_coordinate.SyncBlockEntity();
+
+        data_entry.block = DFW::Entity();
+    }
+
+    void PlayFieldControlSystem::PreUpdate(DFW::DECS::EntityRegistry& a_registry)
     {
         // Destroy Blocks
         for (auto&& [e, block_destroy_tag, playfield_reference] : a_registry.ENTT().view<BlockDestroyTag, PlayFieldRef>().each())
@@ -45,73 +112,6 @@ namespace Tetriys
             MoveBlockInGrid(playfield_reference.Get(), entity, block_movement_comp.desired_movement_action.coordinate, false);
             entity.DeleteComponent<BlockMoveAction>();
         }
-    }
-
-    void PlayFieldControlSystem::InsertBlockInGrid(PlayField& a_playfield, DFW::Entity const& a_block, BlockCoordinate const& a_coordinate, bool const a_override_block)
-    {
-        PlayFieldDataEntry& data_entry = a_playfield.GetDataEntry(a_coordinate);
-
-        if (data_entry.block.IsEntityValid())
-        {
-            if (a_override_block)
-                data_entry.DestroyBlockEntity();
-            else
-                return; // Can't override block, as a valid block in the way.
-        }
-
-        data_entry.block = a_block;
-        data_entry.SyncBlockEntity();
-
-        data_entry.block.AddComponent<PlayFieldRef>(a_playfield);
-    }
-
-    void PlayFieldControlSystem::DestroyBlockInGrid(PlayField& a_playfield, DFW::Entity& a_block)
-    {
-        DestroyBlockInGrid(a_playfield, a_block.GetComponent<BlockComponent>().grid_coordinate);
-    }
-
-    void PlayFieldControlSystem::DestroyBlockInGrid(PlayField& a_playfield, BlockCoordinate const& a_coordinate)
-    {
-        a_playfield.GetDataEntry(a_coordinate).DestroyBlockEntity();
-    }
-
-    void PlayFieldControlSystem::RemoveBlockInGrid(PlayField& a_playfield, DFW::Entity& a_block)
-    {
-        RemoveBlockInGrid(a_playfield, a_block.GetComponent<BlockComponent>().grid_coordinate);
-    }
-
-    void PlayFieldControlSystem::RemoveBlockInGrid(PlayField& a_playfield, BlockCoordinate const& a_coordinate)
-    {
-        a_playfield. GetDataEntry(a_coordinate).ClearBlockEntity();
-    }
-
-    void PlayFieldControlSystem::MoveBlockInGrid(PlayField& a_playfield, DFW::Entity& a_block, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
-    {
-        MoveBlockInGrid(a_playfield, a_block.GetComponent<BlockComponent>().grid_coordinate, a_new_coordinate, a_override_block);
-    }
-
-    void PlayFieldControlSystem::MoveBlockInGrid(PlayField& a_playfield, BlockCoordinate const& a_current_coordinate, BlockCoordinate const& a_new_coordinate, bool const a_override_block)
-    {
-        PlayFieldDataEntry& data_entry = a_playfield.GetDataEntry(a_current_coordinate);
-
-        if (!data_entry.block.IsEntityValid())
-            return; // No valid block to move to new coordinate.
-
-        PlayFieldDataEntry& data_entry_at_new_coordinate = a_playfield.GetDataEntry(a_new_coordinate);
-
-        if (data_entry_at_new_coordinate.block.IsEntityValid())
-        {
-            if (a_override_block)
-                data_entry_at_new_coordinate.DestroyBlockEntity();
-            else
-                return; // Can't override block, as a valid block in the way.
-        }
-
-        // Move block entity to new data_entry.
-        data_entry_at_new_coordinate.block = data_entry.block;
-        data_entry_at_new_coordinate.SyncBlockEntity();
-
-        data_entry.block = DFW::Entity();
     }
 
 } // End of namespace ~ Tetriys.

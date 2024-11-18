@@ -15,33 +15,33 @@ namespace Tetriys
 {
     namespace Detail
     {
-        bool WantsToTeleport(TetrominoMovementComponent const& a_tetromino)
+        static bool WantsToTeleport(TetrominoMovementComponent const& a_tetromino)
         {
             return a_tetromino.desired_movement_action.is_absolute_coordinate && a_tetromino.desired_movement_action.coordinate != glm::ivec2(0.0f);
         }
 
-        bool WantsToStrafe(TetrominoMovementComponent const& a_tetromino)
+        static bool WantsToStrafe(TetrominoMovementComponent const& a_tetromino)
         {
             return a_tetromino.desired_movement_action.coordinate != glm::ivec2(0.0f);
         }
 
-        bool WantsToRotate(TetrominoMovementComponent const& a_tetromino)
+        static bool WantsToRotate(TetrominoMovementComponent const& a_tetromino)
         {
             return a_tetromino.desired_rotation_action != TetrominoRotation::None;
         }
 
-        bool WantsToSoftDrop(TetrominoMovementComponent const& a_tetromino)
+        static bool WantsToSoftDrop(TetrominoMovementComponent const& a_tetromino)
         {
             return a_tetromino.wants_to_soft_drop == true;
         }
 
-        bool WantsToHardDrop(TetrominoMovementComponent const& a_tetromino)
+        static bool WantsToHardDrop(TetrominoMovementComponent const& a_tetromino)
         {
             return a_tetromino.wants_to_hard_drop == true;
         }
     }
 
-    void TetrominoControlSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    void TetrominoControlSystem::PreUpdate(DFW::DECS::EntityRegistry& a_registry)
     {
         // Destroy Tetromino
         for (auto&& [e, tetromino_destroy_tag, playfield_reference] : a_registry.ENTT().view<TetrominoDestroyTag, PlayFieldRef>().each())
@@ -65,9 +65,11 @@ namespace Tetriys
             DFW::Entity entity(e, a_registry);
             InsertTetromino(playfield_reference.Get(), entity, tetromino_insertion.coordinate);
             entity.DeleteComponent<TetrminoInsertAction>();
-        }   
+        }
+    }
 
-        // Move Tetromino
+    void TetrominoControlSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
         for (auto&& [e, tetromino_movement_comp, playfield_reference] : a_registry.ENTT().view<TetrominoMovementComponent, PlayFieldRef>().each())
         {
             DFW::Entity entity(e, a_registry);
@@ -96,7 +98,7 @@ namespace Tetriys
             {
                 RotateTetromino(playfield, entity, tetromino_movement_comp.desired_rotation_action);
                 tetromino_movement_comp.has_moved = true;
-                tetromino_movement_comp.is_rotating= true;
+                tetromino_movement_comp.is_rotating = true;
             }
 
             if (Detail::WantsToSoftDrop(tetromino_movement_comp))
@@ -117,7 +119,7 @@ namespace Tetriys
         }
     }
 
-    void TetrominoControlSystem::InsertTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
+    void InsertTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
@@ -127,21 +129,21 @@ namespace Tetriys
             a_tetromino.AddComponent<PlayFieldRef>(a_playfield);
     }
 
-    void TetrominoControlSystem::DestroyTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino)
+    void DestroyTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
             DestroyBlockInGrid(a_playfield, tetromino.block_components[index]->grid_coordinate);
     }
 
-    void TetrominoControlSystem::RemoveTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino)
+    void RemoveTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
             RemoveBlockInGrid(a_playfield, tetromino.block_components[index]->grid_coordinate);
     }
 
-    void TetrominoControlSystem::MoveTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
+    void MoveTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
 
@@ -188,13 +190,13 @@ namespace Tetriys
         }
     }
 
-    void TetrominoControlSystem::TranslateTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate_offset)
+    void TranslateTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, BlockCoordinate const& a_coordinate_offset)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         MoveTetromino(a_playfield, a_tetromino, tetromino.block_components[tetromino.origin_block_index]->grid_coordinate + a_coordinate_offset);
     }
 
-    void TetrominoControlSystem::RotateTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, TetrominoRotation const& a_rotation)
+    void RotateTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino, TetrominoRotation const& a_rotation)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
 

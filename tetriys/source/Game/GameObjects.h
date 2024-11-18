@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Game/PlayField.h>
+#include <Game/GameState.h>
 #include <Game/BlockComponent.h>
 #include <Game/TetrominoComponent.h>
 #include <Game/GameControllerSystem.h>
@@ -68,7 +69,11 @@ namespace Tetriys
             player_game.AddComponent<ControllerRef>(DFW::ControllerNameID(a_game_id));
 
             // Score Component
-            // Playstate
+
+            // Game/Playstate
+            player_game.AddComponent<GameStateComponent>().game_state = GameState::START_GAME;
+            player_game.AddComponent<GameStateComponent>().play_state = PlayState::NONE;
+            player_game.AddComponent<GameNameIDComponent>().game_id = a_game_id;
 
             return player_game;
         }

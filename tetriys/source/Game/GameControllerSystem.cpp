@@ -14,11 +14,13 @@ namespace Tetriys
     void GameControllerSystem::Init(DFW::DECS::EntityRegistry& a_registry)
     {
         ECSEventHandler().RegisterCallback<TetrominoPlacedEvent, &GameControllerSystem::OnTetrominoPlacedEvent>(this);
+        ECSEventHandler().RegisterCallback<TetrominoSpawnedEvent, &GameControllerSystem::OnTetrominoSpawnedEvent>(this);
     }
 
     void GameControllerSystem::Terminate(DFW::DECS::EntityRegistry& a_registry)
     {
         ECSEventHandler().UnregisterCallback<TetrominoPlacedEvent, &GameControllerSystem::OnTetrominoPlacedEvent>(this);
+        ECSEventHandler().UnregisterCallback<TetrominoSpawnedEvent, &GameControllerSystem::OnTetrominoSpawnedEvent>(this);
     }
 
     void GameControllerSystem::Update(DFW::DECS::EntityRegistry& a_registry)
@@ -65,11 +67,27 @@ namespace Tetriys
         ControllerSystem::Update(a_registry);
     }
 
-    void GameControllerSystem::OnTetrominoPlacedEvent(TetrominoPlacedEvent const& a_event)
+    void GameControllerSystem::OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event)
     {
-        DFW::ControllerNameID const& name_id = a_event.tetromino.GetComponent<PossessedByController>().controller_name_id;
+        a_event.placed_tetromino.DeleteComponent<TetrominoMovementComponent>();
+
+        DFW::ControllerNameID const& name_id = a_event.placed_tetromino.GetComponent<PossessedByController>().controller_name_id;
         if (DFW::SharedPtr<TetrominoController> const tetromino_controller = GetController<TetrominoController>(name_id))
             tetromino_controller->ReleaseTetromino();
+    }
+
+    void GameControllerSystem::OnTetrominoSpawnedEvent(TetrominoSpawnedEvent& a_event)
+    {
+        a_event.spawned_tetromino.AddComponent<TetrominoMovementComponent>();
+
+        DFW::ControllerNameID const& name_id = a_event.spawned_in_game_id;
+        if (DFW::SharedPtr<TetrominoController> const tetromino_controller = GetController<TetrominoController>(name_id))
+        {
+            if (!tetromino_controller->GetPossessedTetromino())
+            {
+                tetromino_controller->PossessTetromino(a_event.spawned_tetromino);
+            }
+        }
     }
 
 } // End of namespace ~ Tetriys.

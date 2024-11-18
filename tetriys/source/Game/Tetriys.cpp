@@ -61,42 +61,39 @@ namespace Tetriys
 
         PlayField& _playfield = _player_game.GetComponent<PlayField>();
 
-        auto playfield_control_system = _ecs->SystemManager().GetSystem<PlayFieldControlSystem>();
-        playfield_control_system->InsertBlockInGrid(_playfield, GameObjects::CreateBlockEntity(*_ecs, DFW::RandomColourRGBA()), BlockCoordinate(0, 19), false);
-        playfield_control_system->InsertBlockInGrid(_playfield, GameObjects::CreateBlockEntity(*_ecs, DFW::RandomColourRGBA()), BlockCoordinate(9, 19), false);
+        //InsertBlockInGrid(_playfield, GameObjects::CreateBlockEntity(_ecs->Registry(), DFW::RandomColourRGBA()), BlockCoordinate(0, 19), false);
+        //InsertBlockInGrid(_playfield, GameObjects::CreateBlockEntity(_ecs->Registry(), DFW::RandomColourRGBA()), BlockCoordinate(9, 19), false);
 
-        auto tetromino_control_system = _ecs->SystemManager().GetSystem<TetrominoControlSystem>();
+        //DFW::Entity T = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::T);
+        //InsertTetromino(_playfield, T, BlockCoordinate(5, 19));
 
-        DFW::Entity T = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::T);
-        tetromino_control_system->InsertTetromino(_playfield, T, BlockCoordinate(5, 19));
+        //DFW::Entity I = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::I);
+        //InsertTetromino(_playfield, I, BlockCoordinate(5, 15));
+        //TranslateTetromino(_playfield, I, BlockCoordinate(-2, 0));
+        //RotateTetromino(_playfield, I, TetrominoRotation::Clockwise);
+        //TranslateTetromino(_playfield, I, BlockCoordinate(1, 1));
 
-        DFW::Entity I = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::I);
-        tetromino_control_system->InsertTetromino(_playfield, I, BlockCoordinate(5, 15));
-        tetromino_control_system->TranslateTetromino(_playfield, I, BlockCoordinate(-2, 0));
-        tetromino_control_system->RotateTetromino(_playfield, I, TetrominoRotation::Clockwise);
-        tetromino_control_system->TranslateTetromino(_playfield, I, BlockCoordinate(1, 1));
+        //DFW::Entity O = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::O);
+        //InsertTetromino(_playfield, O, BlockCoordinate(5, 11));
+        //RotateTetromino(_playfield, O, TetrominoRotation::Clockwise180);
 
-        DFW::Entity O = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::O);
-        tetromino_control_system->InsertTetromino(_playfield, O, BlockCoordinate(5, 11));
-        tetromino_control_system->RotateTetromino(_playfield, O, TetrominoRotation::Clockwise180);
+        //DFW::Entity J = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::J);
+        //InsertTetromino(_playfield, J, BlockCoordinate(2, 10));
 
-        DFW::Entity J = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::J);
-        tetromino_control_system->InsertTetromino(_playfield, J, BlockCoordinate(2, 10));
+        //DFW::Entity L = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::L);
+        //_ecs->SystemManager().GetSystem<GameControllerSystem>()->GetController<TetrominoController>("PlayerOne")->PossessTetromino(L);
+        //L.AddComponent<TetrominoMovementComponent>();
+        //L.AddComponent<GravityComponent>();
+        //L.AddComponent<PlacementComponent>();
+        //InsertTetromino(_playfield, L, BlockCoordinate(8, 10));
 
-        DFW::Entity L = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::L);
-        _ecs->SystemManager().GetSystem<GameControllerSystem>()->GetController<TetrominoController>("PlayerOne")->PossessTetromino(L);
-        L.AddComponent<TetrominoMovementComponent>();
-        L.AddComponent<GravityComponent>();
-        L.AddComponent<PlacementComponent>();
-        tetromino_control_system->InsertTetromino(_playfield, L, BlockCoordinate(8, 10));
+        //DFW::Entity Z = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::Z);
+        //InsertTetromino(_playfield, Z, BlockCoordinate(2, 5));
+        //RotateTetromino(_playfield, Z, TetrominoRotation::Clockwise180);
 
-        DFW::Entity Z = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::Z);
-        tetromino_control_system->InsertTetromino(_playfield, Z, BlockCoordinate(2, 5));
-        tetromino_control_system->RotateTetromino(_playfield, Z, TetrominoRotation::Clockwise180);
-
-        DFW::Entity S = GameObjects::CreateTetrominoEntity(*_ecs, TetrominoType::S);
-        tetromino_control_system->InsertTetromino(_playfield, S, BlockCoordinate(8, 5));
-        tetromino_control_system->MoveTetromino(_playfield, S, BlockCoordinate(8, 4));
+        //DFW::Entity S = GameObjects::CreateTetrominoEntity(_ecs->Registry(), TetrominoType::S);
+        //InsertTetromino(_playfield, S, BlockCoordinate(8, 5));
+        //MoveTetromino(_playfield, S, BlockCoordinate(8, 4));
 
     }
 
@@ -113,26 +110,29 @@ namespace Tetriys
         // Init Systems
         _ecs->Init();
 
-        auto& render_system = _ecs->SystemManager().AddSystem<DFW::RenderSystem>();
-        auto& debug_render_system = _ecs->SystemManager().AddSystem<DFW::DebugRenderSystem>();
-        auto& camera_system = _ecs->SystemManager().AddSystem<DFW::CameraSystem>();
-        auto& transform_system = _ecs->SystemManager().AddSystem<DFW::TransformSystem>();
-
-        auto& playfield_control_system = _ecs->SystemManager().AddSystem<PlayFieldControlSystem>();
-        auto& tetromino_control_system = _ecs->SystemManager().AddSystem<TetrominoControlSystem>();
-        
-        auto& controller_system = _ecs->SystemManager().AddSystem<GameControllerSystem>();
-        auto& game_logic_system = _ecs->SystemManager().AddSystem<GameLogicSystem>();
-
-        debug_render_system.ExecuteAfter(transform_system);
-        render_system.ExecuteAfter(transform_system);
-        transform_system.ExecuteAfter(camera_system);
-        
-        camera_system.ExecuteAfter(tetromino_control_system);
-
+        auto& play_director             = _ecs->SystemManager().AddSystem<PlayDirector>();
+        auto& controller_system         = _ecs->SystemManager().AddSystem<GameControllerSystem>();
+        controller_system.ExecuteAfter(play_director);
+        auto& spawn_system = _ecs->SystemManager().AddSystem<SpawnSystem>();
+        spawn_system.ExecuteAfter(controller_system);
+        auto& playfield_control_system  = _ecs->SystemManager().AddSystem<PlayFieldControlSystem>();
+        playfield_control_system.ExecuteAfter(controller_system);
+        auto& tetromino_control_system  = _ecs->SystemManager().AddSystem<TetrominoControlSystem>();
         tetromino_control_system.ExecuteAfter(playfield_control_system);
-        playfield_control_system.ExecuteAfter(game_logic_system);
-        game_logic_system.ExecuteAfter(controller_system);
+        auto& gravity_system            = _ecs->SystemManager().AddSystem<GravitySystem>();
+        gravity_system.ExecuteAfter(tetromino_control_system);
+        auto& lock_system               = _ecs->SystemManager().AddSystem<LockTetrominoPlacementSystem>();
+        lock_system.ExecuteAfter(gravity_system);
+
+
+        auto& transform_system      = _ecs->SystemManager().AddSystem<DFW::TransformSystem>();
+        transform_system.ExecuteAfter(lock_system);
+        auto& camera_system         = _ecs->SystemManager().AddSystem<DFW::CameraSystem>();
+        camera_system.ExecuteAfter(transform_system);
+        auto& debug_render_system   = _ecs->SystemManager().AddSystem<DFW::DebugRenderSystem>();
+        debug_render_system.ExecuteAfter(transform_system);
+        auto& render_system         = _ecs->SystemManager().AddSystem<DFW::RenderSystem>();
+        render_system.ExecuteAfter(transform_system);
 
         _ecs->SystemManager().CalculateSystemDependencies();
     }
