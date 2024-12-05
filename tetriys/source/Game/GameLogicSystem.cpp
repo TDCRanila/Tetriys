@@ -222,8 +222,8 @@ namespace Tetriys
 
     void SpawnSystem::Update(DFW::DECS::EntityRegistry& a_registry)
     {
-        for (auto&& [e, game_state_comp, game_id_comp]
-            : a_registry.ENTT().view<GameStateComponent, GameNameIDComponent>().each())
+        for (auto&& [e, game_state_comp, game_id_comp, playfield]
+            : a_registry.ENTT().view<GameStateComponent, GameNameIDComponent, PlayField>().each())
         {
             if (game_state_comp.play_state == PlayState::SPAWNING)
             {
@@ -236,9 +236,8 @@ namespace Tetriys
                     test++;
 
                 DFW::Entity spawned_tetromino = GameObjects::CreateTetrominoEntity(a_registry, static_cast<TetrominoType>(test));
-                DFW::Entity game_entry(e, a_registry);
                 spawned_tetromino.AddComponent<TetrminoInsertAction>(BlockCoordinate(5, 20));
-                spawned_tetromino.AddComponent<PlayFieldRef>(game_entry.GetComponent<PlayField>());
+                spawned_tetromino.AddComponent<PlayFieldRef>(playfield);
 
                 ECSEventHandler().Broadcast<TetrominoSpawnedEvent>(spawned_tetromino, game_id_comp.game_id);
             }
