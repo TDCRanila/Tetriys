@@ -21,9 +21,9 @@ namespace Tetriys
 {
     namespace GameObjects
     {
-        inline DFW::Entity CreateGameObject(DFW::DECS::ECSModule& a_ecs)
+        inline DFW::Entity CreateGameObject(DFW::DECS::EntityRegistry& a_registry)
         {
-            DFW::Entity game_object = a_ecs.Registry().CreateEntity();
+            DFW::Entity game_object = a_registry.CreateEntity();
 
             game_object.AddComponent<DFW::GameObjectTagComponent>();
             game_object.AddComponent<DFW::TransformComponent>();
@@ -31,9 +31,9 @@ namespace Tetriys
             return game_object;
         }
 
-        inline DFW::Entity CreateBlockEntity(DFW::DECS::ECSModule& a_ecs, DFW::ColourRGBA const& a_block_colour)
+        inline DFW::Entity CreateBlockEntity(DFW::DECS::EntityRegistry& a_registry, DFW::ColourRGBA const& a_block_colour)
         {
-            DFW::Entity block = CreateGameObject(a_ecs);
+            DFW::Entity block = CreateGameObject(a_registry);
             block.SetType<"Tetriys::Block">();
 
             block.AddComponent<BlockComponent>();
@@ -44,19 +44,19 @@ namespace Tetriys
             return block;
         }
 
-        inline DFW::Entity CreateTetrominoEntity(DFW::DECS::ECSModule& a_ecs, TetrominoType const& a_tetromino_type)
+        inline DFW::Entity CreateTetrominoEntity(DFW::DECS::EntityRegistry& a_registry, TetrominoType const& a_tetromino_type)
         {
-            DFW::Entity tetromino = CreateGameObject(a_ecs);
+            DFW::Entity tetromino = CreateGameObject(a_registry);
             tetromino.SetType<"Tetriys::Tetromino">();
 
-            tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_ecs, a_tetromino_type);
+            tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_registry, a_tetromino_type);
 
             return tetromino;
         }
 
         inline DFW::Entity CreateGameEntry(DFW::DECS::ECSModule& a_ecs, std::string const& a_game_id)
         {
-            DFW::Entity player_game = CreateGameObject(a_ecs);
+            DFW::Entity player_game = CreateGameObject(a_ecs.Registry());
             player_game.SetType<"Tetriys::GameEntry">();
             player_game.SetName(a_game_id);
 

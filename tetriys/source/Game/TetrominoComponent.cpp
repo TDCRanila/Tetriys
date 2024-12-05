@@ -17,14 +17,14 @@ namespace Tetriys
     {
     }
 
-    void TetrominoComponent::ConstructTetromino(DFW::DECS::ECSModule& a_ecs, TetrominoType const& a_tetromino_type)
+    void TetrominoComponent::ConstructTetromino(DFW::DECS::EntityRegistry& a_registry, TetrominoType const& a_tetromino_type)
     {       
         type = a_tetromino_type;
 
-        auto SetupTetrominoBlock = [this, &a_ecs](int32 const index, BlockCoordinate const& a_local_offset_coordinate, DFW::ColourRGBA const& a_tetromino_colour)
+        auto SetupTetrominoBlock = [this, &a_registry](int32 const index, BlockCoordinate const& a_local_offset_coordinate, DFW::ColourRGBA const& a_tetromino_colour)
         {
             DFW::Entity& block = blocks[index];
-            blocks[index] = GameObjects::CreateBlockEntity(a_ecs, a_tetromino_colour);
+            blocks[index] = GameObjects::CreateBlockEntity(a_registry, a_tetromino_colour);
             block.SetParent(GetOwner());
 
             BlockComponent& block_component = block.GetComponent<BlockComponent>();

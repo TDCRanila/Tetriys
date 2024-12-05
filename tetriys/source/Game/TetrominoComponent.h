@@ -18,7 +18,7 @@ namespace Tetriys
     {
         TetrominoComponent();
 
-        void ConstructTetromino(DFW::DECS::ECSModule& a_ecs, TetrominoType const& a_tetromino_type);
+        void ConstructTetromino(DFW::DECS::EntityRegistry& a_registry, TetrominoType const& a_tetromino_type);
 
         void Debug_DisplayBlockCoordinates() const;
 
