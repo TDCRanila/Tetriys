@@ -62,7 +62,7 @@ namespace Tetriys
 
             // Playfield
             PlayField& playfield = player_game.AddComponent<PlayField>();
-            playfield.Setup(a_ecs);
+            playfield.Setup();
 
             // Controller
             a_ecs.SystemManager().GetSystem<GameControllerSystem>()->ConstructController<TetrominoController>(DFW::ControllerNameID(a_game_id));

@@ -12,6 +12,8 @@ namespace Tetriys
 {
     void PlayFieldDataEntry::SyncBlockEntity()
     {
+        DFW_ASSERT(block);
+
         DFW::TransformComponent& block_transform = block.GetComponent<DFW::TransformComponent>();
         block_transform.SetTranslation(block_world_position);
 
@@ -30,7 +32,7 @@ namespace Tetriys
         block = DFW::Entity();
     }
 
-    void PlayField::Setup(DFW::DECS::ECSModule& a_ecs)
+    void PlayField::Setup()
     {
         for (size_t index(0); index < data.size(); index++)
         {
@@ -38,6 +40,12 @@ namespace Tetriys
             data_entry.grid_coordinate = glm::ivec2(GetXCoordinate(index), GetYCoordinate(index));
             data_entry.block_world_position = glm::vec3(data_entry.grid_coordinate.x * TETRIYS_BLOCK_SPACING, data_entry.grid_coordinate.y * TETRIYS_BLOCK_SPACING, 0.0f);
         }
+    }
+
+    void PlayField::Clear()
+    {
+        std::for_each(data.begin(), data.end(), [](PlayFieldDataEntry& a_playfield_entry) { a_playfield_entry.DestroyBlockEntity(); });
+        data.fill(PlayFieldDataEntry());
     }
 
 } // End of namespace ~ Tetriys.

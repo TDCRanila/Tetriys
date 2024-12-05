@@ -23,7 +23,7 @@ namespace Tetriys
         PlayFieldRef(PlayField& a_playfield_ref) : ptr(&a_playfield_ref) { }
 
         PlayField& Get() { return *ptr; }
-        PlayField const& Get() const { return const_cast<PlayField&>(Get()); }
+        PlayField const& Get() const { return const_cast<PlayField&>(const_cast<PlayFieldRef*>(this)->Get()); }
 
     private:
         PlayField* ptr;
@@ -36,7 +36,7 @@ namespace Tetriys
         void DestroyBlockEntity();
 
         glm::vec3 block_world_position;
-        BlockCoordinate grid_coordinate{ 0, 0 };
+        BlockCoordinate grid_coordinate { 0, 0 };
         DFW::Entity block;
     };
 
@@ -44,7 +44,8 @@ namespace Tetriys
         : public DFW::DUtility::StaticGrid2D<PlayFieldDataEntry, TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT>
         , public DFW::DECS::Component::StrictRegistrar<PlayField>
     {
-        void Setup(DFW::DECS::ECSModule& a_ecs);
+        void Setup();
+        void Clear();
 
         PlayFieldDataEntry const& GetDataEntry(BlockCoordinate const& a_coordinate) const { return Get(a_coordinate.x, a_coordinate.y); }
         PlayFieldDataEntry& GetDataEntry(BlockCoordinate const& a_coordinate) { return Get(a_coordinate.x, a_coordinate.y); }
