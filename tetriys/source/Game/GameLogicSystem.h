@@ -17,7 +17,7 @@ namespace Tetriys
 
     inline bool IsTetrominoBlockedAtCoordinate(TetrominoComponent const& a_tetromino, struct PlayField const& a_playfield, BlockCoordinate const& a_coordinate);
     inline bool IsTetrominoBlockedAtCoordinate(DFW::Entity const& a_tetromino, BlockCoordinate const& a_coordinate);
-    inline BlockCoordinate SimulateTetrominoFallLocation(DFW::Entity const& a_tetromino);
+    inline std::array<BlockCoordinate, 4> SimulateTetrominoPlacementLocation(DFW::Entity const& a_tetromino);
     inline bool IsTetrominoBlockedNextGravityTick(TetrominoComponent const& a_tetromino);
     
     class PlayDirector : public DFW::DECS::System::Registrar<PlayDirector>
@@ -95,6 +95,17 @@ namespace Tetriys
 
     private:
         struct ClearedBlockInTetrominoTag : public DFW::DECS::Component::StrictRegistrar<ClearedBlockInTetrominoTag> {};
+
+    };
+
+    class TetrominoPlacementVisualizerSystem : public DFW::DECS::System::Registrar<TetrominoPlacementVisualizerSystem>
+    {
+    public:
+        TetrominoPlacementVisualizerSystem() = default;
+        virtual ~TetrominoPlacementVisualizerSystem() = default;
+
+    private:
+        virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
 
     };
 

@@ -58,7 +58,7 @@ namespace Tetriys
         return IsTetrominoBlockedAtCoordinate(a_tetromino.GetComponent<TetrominoComponent>(), a_tetromino.GetComponent<PlayFieldRef>().Get(), a_coordinate);
     }
 
-    BlockCoordinate SimulateTetrominoFallLocation(DFW::Entity const& a_tetromino)
+    std::array<BlockCoordinate, 4> SimulateTetrominoPlacementLocation(DFW::Entity const& a_tetromino)
     {
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         PlayField const& playfield = a_tetromino.GetComponent<PlayFieldRef>().Get();
@@ -81,7 +81,13 @@ namespace Tetriys
             }
         }
 
-        return current_unblocked_coordinate;
+        std::array<BlockCoordinate, 4> placement_locations;
+        placement_locations[0] = current_unblocked_coordinate + tetromino.block_components[0]->local_offset_coordinate;
+        placement_locations[1] = current_unblocked_coordinate + tetromino.block_components[1]->local_offset_coordinate;
+        placement_locations[2] = current_unblocked_coordinate + tetromino.block_components[2]->local_offset_coordinate;
+        placement_locations[3] = current_unblocked_coordinate + tetromino.block_components[3]->local_offset_coordinate;
+
+        return placement_locations;
     }
 
     void PlayDirector::Init(DFW::DECS::EntityRegistry& a_registry)
@@ -368,4 +374,28 @@ namespace Tetriys
             tetromino.DeleteComponent<ClearedBlockInTetrominoTag>();
         }
     }
+
+    void TetrominoPlacementVisualizerSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, tetromino_movement_comp, playfield_ref]
+            : a_registry.ENTT().view<TetrominoMovementComponent const, PlayFieldRef const>().each())
+        {
+            PlayField const& playfield = playfield_ref.Get();
+
+            std::array<glm::vec3, 4> placement_world_coordinates;
+            std::array<BlockCoordinate, 4> const placement_locations = SimulateTetrominoPlacementLocation(DFW::Entity(e, a_registry));
+            placement_world_coordinates[0] = playfield.GetDataEntry(placement_locations[0]).block_world_position;
+            placement_world_coordinates[1] = playfield.GetDataEntry(placement_locations[1]).block_world_position;
+            placement_world_coordinates[2] = playfield.GetDataEntry(placement_locations[2]).block_world_position;
+            placement_world_coordinates[3] = playfield.GetDataEntry(placement_locations[3]).block_world_position;
+
+            DFW::DebugDrawSettings const draw_settings(DFW::ColourRGBA::LightGrey, true);
+            DFW::DebugRenderSystem* debug_renderer = SystemManager().GetSystem<DFW::DebugRenderSystem>();
+            debug_renderer->DrawCube(DFW::Transform(placement_world_coordinates[0]), TETRIYS_BLOCK_SPACING * 0.5f, draw_settings);
+            debug_renderer->DrawCube(DFW::Transform(placement_world_coordinates[1]), TETRIYS_BLOCK_SPACING * 0.5f, draw_settings);
+            debug_renderer->DrawCube(DFW::Transform(placement_world_coordinates[2]), TETRIYS_BLOCK_SPACING * 0.5f, draw_settings);
+            debug_renderer->DrawCube(DFW::Transform(placement_world_coordinates[3]), TETRIYS_BLOCK_SPACING * 0.5f, draw_settings);
+        }
+    }
+
 } // End of namespace ~ Tetriys.
