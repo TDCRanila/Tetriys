@@ -211,7 +211,6 @@ namespace Tetriys
             {
                 placement_comp.current_placement_time = 0;
             }
-
         }
     }
 
@@ -238,6 +237,9 @@ namespace Tetriys
                 DFW::Entity spawned_tetromino = GameObjects::CreateTetrominoEntity(a_registry, static_cast<TetrominoType>(test));
                 spawned_tetromino.AddComponent<TetrminoInsertAction>(BlockCoordinate(5, 20));
                 spawned_tetromino.AddComponent<PlayFieldRef>(playfield);
+
+                DFW::Entity game_entry(e, a_registry);
+                spawned_tetromino.SetParent(game_entry);
 
                 ECSEventHandler().Broadcast<TetrominoSpawnedEvent>(spawned_tetromino, game_id_comp.game_id);
             }
