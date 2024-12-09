@@ -14,11 +14,15 @@
 
 #include <DFW/Modules/ECS/Entity.h>
 #include <DFW/Modules/ECS/Managers/EntityRegistry.h>
+#include <DFW/Modules/ECS/Internal/EntityRelationComponent.h>
 
 #include <DFW/CoreSystems/CoreServices.h>
 #include <DFW/CoreSystems/Events/EventDispatcher.h>
 
 #include <DFW/GameWorld/Graphics/DebugRenderSystem.h>
+
+#include <ranges>
+#include <algorithm>
 
 namespace Tetriys
 {
@@ -84,12 +88,14 @@ namespace Tetriys
     {
         ECSEventHandler().RegisterCallback<TetrominoSpawnedEvent, &PlayDirector::OnTetrominoSpawnedEvent>(this);
         ECSEventHandler().RegisterCallback<TetrominoPlacedEvent, &PlayDirector::OnTetrominoPlacedEvent>(this);
+        ECSEventHandler().RegisterCallback<PlayfieldLineClearedEvent, &PlayDirector::OnPlayfieldLineClearedEvent>(this);
     }
 
     void PlayDirector::Terminate(DFW::DECS::EntityRegistry& a_registry)
     {
         ECSEventHandler().UnregisterCallback<TetrominoSpawnedEvent, &PlayDirector::OnTetrominoSpawnedEvent>(this);
         ECSEventHandler().UnregisterCallback<TetrominoPlacedEvent, &PlayDirector::OnTetrominoPlacedEvent>(this);
+        ECSEventHandler().UnregisterCallback<PlayfieldLineClearedEvent, &PlayDirector::OnPlayfieldLineClearedEvent>(this);
     }
 
     void PlayDirector::Update(DFW::DECS::EntityRegistry& a_registry)
@@ -125,7 +131,12 @@ namespace Tetriys
     {
         PlayField& playfield = a_event.placed_tetromino.GetComponent<PlayFieldRef>().Get();
         DFW::Entity game_entry = playfield.GetOwner();
-        game_entry.GetComponent<GameStateComponent>().play_state = PlayState::SPAWNING;
+        game_entry.GetComponent<GameStateComponent>().play_state = PlayState::CHECKING_LINE_CLEARS;
+    }
+
+    void PlayDirector::OnPlayfieldLineClearedEvent(PlayfieldLineClearedEvent& a_event)
+    {
+        a_event.game_entry.GetComponent<GameStateComponent>().play_state = PlayState::SPAWNING;
     }
 
     void GravitySystem::Init(DFW::DECS::EntityRegistry& a_registry)
@@ -246,4 +257,115 @@ namespace Tetriys
         }
     }
 
+    void LineClearSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, game_state_comp, game_id_comp, playfield]
+            : a_registry.ENTT().view<GameStateComponent, GameNameIDComponent, PlayField>().each())
+        {
+            if (game_state_comp.play_state != PlayState::CHECKING_LINE_CLEARS)
+            {
+                break;
+            }
+
+            int32 const maximum_possible_line_clears(4);
+            std::vector<int32> full_row_indicies;
+            full_row_indicies.reserve(maximum_possible_line_clears);
+
+            for (int32 row_index(0); row_index < TETRIYS_GRID_HEIGHT; row_index++)
+            {
+                bool is_row_full_with_blocks(true);
+
+                std::array<PlayFieldDataEntry*, TETRIYS_GRID_WIDTH> row_ref = playfield.GetRowRef(row_index);
+                for (PlayFieldDataEntry* data_entry : row_ref)
+                {
+                    if (!data_entry->block.IsEntityValid())
+                    {
+                        is_row_full_with_blocks = false;
+                        break;
+                    }
+                }
+
+                if (is_row_full_with_blocks)
+                {
+                    full_row_indicies.emplace_back(row_index);
+
+                    for (PlayFieldDataEntry* data_entry : row_ref)
+                    {
+                        DFW::Entity& block_parent = data_entry->block.GetComponent<DFW::DECS::EntityRelationComponent>().parent;
+                        block_parent.AddComponent<ClearedBlockInTetrominoTag>();
+
+                        data_entry->DestroyBlockEntity();
+                    }
+                }
+            }
+
+            PlayfieldLineClearedEvent event;
+            event.cleared_line_indices = full_row_indicies;
+            event.game_entry = DFW::Entity(e, a_registry);
+            ECSEventHandler().Broadcast<PlayfieldLineClearedEvent>(event);
+
+            // Back out if there are no full rows.
+            if (full_row_indicies.empty())
+            {
+                break;
+            }
+
+            // Push rows down after line clear - start from high to low to try and reduce row swaps.
+            std::ranges::sort(full_row_indicies, std::ranges::greater());
+
+            auto SwapRows = [&playfield](
+                std::array<PlayFieldDataEntry*, TETRIYS_GRID_WIDTH> a_bottom_row,
+                std::array<PlayFieldDataEntry*, TETRIYS_GRID_WIDTH> a_top_row)
+                {
+                    for (int32 item_index(0); item_index < TETRIYS_GRID_WIDTH; item_index++)
+                    {
+                        PlayFieldDataEntry* bottom_data_entry = a_bottom_row.at(item_index);
+                        PlayFieldDataEntry* top_data_entry = a_top_row.at(item_index);
+                        std::swap(bottom_data_entry->block, top_data_entry->block);
+
+                        if (bottom_data_entry->block)
+                            bottom_data_entry->SyncBlockEntity();
+                        if (top_data_entry->block)
+                            top_data_entry->SyncBlockEntity();
+                    }
+                };
+
+            for (int32 row_index : full_row_indicies)
+            {
+                for (row_index; row_index + 1 < TETRIYS_GRID_HEIGHT; row_index++)
+                {
+                    SwapRows(playfield.GetRowRef(row_index), playfield.GetRowRef(row_index + 1));
+                }
+            }
+        }
+    }
+
+    void LineClearSystem::PostUpdate(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, tetromino_component, cleared_tetromino_tag] : a_registry.ENTT().view<TetrominoComponent const, ClearedBlockInTetrominoTag const>(entt::exclude<TetrminoInsertAction>).each())
+        {
+            bool should_cleanup_entity(false);
+            DFW::Entity tetromino(e, a_registry);
+
+            //DFW_INFOLOG("----- {}", tetromino_component.GetOwner().GetName());
+            for (DFW::Entity const& block : tetromino_component.blocks)
+            {
+                DFW::EntityHandle const handle = block ? block.GetHandle() : DFW::DECS::DFW_NULL_ENTITY_HANDLE;
+                std::string const& name = block ? block.GetName() : "INVALID";
+                //DFW_INFOLOG("{}-{}-{}", handle, name, block.IsEntityValid());
+                should_cleanup_entity = !block.IsEntityValid();
+            }
+
+            if (!tetromino_component.blocks[0].IsEntityValid()
+                && !tetromino_component.blocks[1].IsEntityValid()
+                && !tetromino_component.blocks[2].IsEntityValid()
+                && !tetromino_component.blocks[3].IsEntityValid())
+            {
+                //DFW_INFOLOG("Destroyed Tetromino: {}", e);
+                tetromino.DestroySelf();
+            }
+
+            tetromino.DeleteComponent<ClearedBlockInTetrominoTag>();
+        }
+    }
 } // End of namespace ~ Tetriys.

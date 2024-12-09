@@ -33,6 +33,7 @@ namespace Tetriys
 
         void OnTetrominoSpawnedEvent(TetrominoSpawnedEvent& a_event);
         void OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event);
+        void OnPlayfieldLineClearedEvent(PlayfieldLineClearedEvent& a_event);
 
     };
 
@@ -79,6 +80,21 @@ namespace Tetriys
 
     private:
         virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
+
+    };
+
+    class LineClearSystem : public DFW::DECS::System::Registrar<LineClearSystem>
+    {
+    public:
+        LineClearSystem() = default;
+        virtual ~LineClearSystem() = default;
+
+    private:
+        virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
+        virtual void PostUpdate(DFW::DECS::EntityRegistry& a_registry) override;
+
+    private:
+        struct ClearedBlockInTetrominoTag : public DFW::DECS::Component::StrictRegistrar<ClearedBlockInTetrominoTag> {};
 
     };
 

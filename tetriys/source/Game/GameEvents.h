@@ -10,7 +10,8 @@ namespace Tetriys
 {
 	enum class TetriysEvents
 	{
-		TetrominoPlacedEvent, TetrominoSpawnedEvent
+		TetrominoPlacedEvent, TetrominoSpawnedEvent,
+		PlayfieldLineClearedEvent
 	};
 
 	class TetrominoPlacedEvent : public DFW::Event
@@ -50,6 +51,20 @@ namespace Tetriys
 
 		DFW::Entity spawned_tetromino;
 		GameNameID spawned_in_game_id;
+	};
+
+	class PlayfieldLineClearedEvent : public DFW::Event
+	{
+	public:
+		PlayfieldLineClearedEvent() = default;
+		virtual ~PlayfieldLineClearedEvent() = default;
+
+		DFW_CONSTRUCT_EVENT(TetriysEvents, PlayfieldLineClearedEvent);
+
+
+		std::vector<int32> cleared_line_indices;
+		DFW::Entity game_entry;
+
 	};
 
 } // End of namespace ~ Tetriys.
