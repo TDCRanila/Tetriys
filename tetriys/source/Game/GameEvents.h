@@ -21,6 +21,8 @@ namespace Tetriys
 			: placed_tetromino(a_tetromino)
 		{}
 
+		virtual ~TetrominoPlacedEvent() = default;
+
 		DFW_CONSTRUCT_EVENT(TetriysEvents, TetrominoPlacedEvent);
 
 		std::string GetDebugString() const override
@@ -46,6 +48,8 @@ namespace Tetriys
 			: spawned_tetromino(a_tetromino)
 			, spawned_in_game_id(a_spawned_in_game_id)
 		{}
+
+		virtual ~TetrominoSpawnedEvent() = default;
 
 		DFW_CONSTRUCT_EVENT(TetriysEvents, TetrominoSpawnedEvent);
 
