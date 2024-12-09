@@ -48,6 +48,7 @@ namespace Tetriys
         virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
 
         void OnTetrominoSpawnedEvent(TetrominoSpawnedEvent& a_event);
+        void OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event);
     
     private:
         DFW::SharedPtr<DFW::GameClock> _game_clock;
