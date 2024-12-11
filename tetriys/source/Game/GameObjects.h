@@ -36,6 +36,10 @@ namespace Tetriys
             DFW::Entity block = CreateGameObject(a_registry);
             block.SetType<"Tetriys::Block">();
 
+            // Debug
+            static int32 block_count(0);
+            block.SetName("Block" + std::to_string(block_count++));
+
             block.AddComponent<BlockComponent>();
 
             DFW::ModelComponent& model_component = block.AddComponent<DFW::ModelComponent>();
@@ -48,6 +52,10 @@ namespace Tetriys
         {
             DFW::Entity tetromino = CreateGameObject(a_registry);
             tetromino.SetType<"Tetriys::Tetromino">();
+
+            // Debug
+            static int32 tetromino_count(0);
+            tetromino.SetName("Tetromino" + std::to_string(tetromino_count++));
 
             tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_registry, a_tetromino_type);
 
