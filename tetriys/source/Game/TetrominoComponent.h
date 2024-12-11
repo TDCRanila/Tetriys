@@ -3,6 +3,8 @@
 #include <DFW/Modules/ECS/Entity.h>
 #include <DFW/Modules/ECS/Component.h>
 
+#include <DFW/Utility/ColourUtility.h>
+
 #include <array>
 
 namespace Tetriys
@@ -19,6 +21,8 @@ namespace Tetriys
         TetrominoComponent();
 
         void ConstructTetromino(DFW::DECS::EntityRegistry& a_registry, TetrominoType const& a_tetromino_type);
+
+        static DFW::ColourRGBA GetTetrominoColourFromType(TetrominoType const& a_tetromino_type);
 
         void Debug_DisplayBlockCoordinates() const;
 

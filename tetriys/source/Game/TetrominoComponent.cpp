@@ -3,8 +3,6 @@
 #include <Game/BlockComponent.h>
 #include <Game/GameObjects.h>
 
-#include <DFW/Utility/ColourUtility.h>
-
 #include <DFW/Defines/MathDefines.h>
 
 #include <DFW/CoreSystems/Logging/Logger.h>
@@ -24,7 +22,7 @@ namespace Tetriys
         auto SetupTetrominoBlock = [this, &a_registry](int32 const index, BlockCoordinate const& a_local_offset_coordinate, DFW::ColourRGBA const& a_tetromino_colour)
         {
             DFW::Entity& block = blocks[index];
-            blocks[index] = GameObjects::CreateBlockEntity(a_registry, a_tetromino_colour);
+            block = GameObjects::CreateBlockEntity(a_registry, a_tetromino_colour);
             block.SetParent(GetOwner());
 
             BlockComponent& block_component = block.GetComponent<BlockComponent>();
@@ -32,15 +30,14 @@ namespace Tetriys
             block_component.local_offset_coordinate = a_local_offset_coordinate;
         };
 
-        DFW::ColourRGBA const tetromino_origin_colour = DFW::ColourRGBA::LightGrey;
+        DFW::ColourRGBA const tetromino_colour = GetTetrominoColourFromType(type);
+
         switch (type)
         {
             case(TetrominoType::I):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Cyan;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate( 0,  0), tetromino_colour.Mix(tetromino_origin_colour));
+                SetupTetrominoBlock(0, BlockCoordinate( 0,  0), tetromino_colour);
                 SetupTetrominoBlock(1, BlockCoordinate( 1,  0), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate( 2,  0), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(-1, -0), tetromino_colour);
@@ -49,10 +46,8 @@ namespace Tetriys
             }
             case(TetrominoType::O):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Yellow;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate(0, 0), tetromino_colour.Mix(tetromino_origin_colour));
+                SetupTetrominoBlock(0, BlockCoordinate(0, 0), tetromino_colour);
                 SetupTetrominoBlock(1, BlockCoordinate(0, 1), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate(1, 0), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(1, 1), tetromino_colour);
@@ -61,10 +56,8 @@ namespace Tetriys
             }
             case(TetrominoType::J):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Blue;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate( 0,  0), tetromino_colour.Mix(tetromino_origin_colour));
+                SetupTetrominoBlock(0, BlockCoordinate( 0,  0), tetromino_colour);
                 SetupTetrominoBlock(1, BlockCoordinate( 1,  0), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate(-1,  0), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(-1,  1), tetromino_colour);
@@ -73,10 +66,8 @@ namespace Tetriys
             }
             case(TetrominoType::L):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Orange;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate( 0, 0), tetromino_colour.Mix(tetromino_origin_colour));
+                SetupTetrominoBlock(0, BlockCoordinate( 0, 0), tetromino_colour);
                 SetupTetrominoBlock(1, BlockCoordinate( 1, 0), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate( 1, 1), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(-1, 0), tetromino_colour);
@@ -85,10 +76,8 @@ namespace Tetriys
             }
             case(TetrominoType::T):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Purple;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate( 0, 0), tetromino_colour.Mix(tetromino_origin_colour));
+                SetupTetrominoBlock(0, BlockCoordinate( 0, 0), tetromino_colour);
                 SetupTetrominoBlock(1, BlockCoordinate( 1, 0), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate( 0, 1), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(-1, 0), tetromino_colour);
@@ -97,10 +86,8 @@ namespace Tetriys
             }
             case(TetrominoType::S):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Green;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate( 0, 0), tetromino_colour.Mix(tetromino_origin_colour));
+                SetupTetrominoBlock(0, BlockCoordinate( 0, 0), tetromino_colour);
                 SetupTetrominoBlock(1, BlockCoordinate( 0, 1), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate( 1, 1), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(-1, 0), tetromino_colour);
@@ -109,12 +96,10 @@ namespace Tetriys
             }
             case(TetrominoType::Z):
             {
-                DFW::ColourRGBA const tetromino_colour = DFW::ColourRGBA::Red;
-
                 // First Block - Origin.
-                SetupTetrominoBlock(0, BlockCoordinate( 0,  0), tetromino_colour.Mix(tetromino_origin_colour));
-                SetupTetrominoBlock(1, BlockCoordinate( 1,  0), tetromino_colour);
+                SetupTetrominoBlock(0, BlockCoordinate( 0,  0), tetromino_colour);
                 SetupTetrominoBlock(2, BlockCoordinate( 0,  1), tetromino_colour);
+                SetupTetrominoBlock(1, BlockCoordinate( 1,  0), tetromino_colour);
                 SetupTetrominoBlock(3, BlockCoordinate(-1,  1), tetromino_colour);
 
                 return;
@@ -123,6 +108,46 @@ namespace Tetriys
             {
                 DFW_ASSERT(false);
                 return;
+            }
+        }
+    }
+
+    DFW::ColourRGBA TetrominoComponent::GetTetrominoColourFromType(TetrominoType const& a_tetromino_type)
+    {
+        switch (a_tetromino_type)
+        {
+            case(TetrominoType::I):
+            {
+                return DFW::ColourRGBA::Cyan;
+            }
+            case(TetrominoType::O):
+            {
+                return DFW::ColourRGBA::Yellow;
+            }
+            case(TetrominoType::J):
+            {
+                return DFW::ColourRGBA::Blue;
+            }
+            case(TetrominoType::L):
+            {
+                return DFW::ColourRGBA::Orange;
+            }
+            case(TetrominoType::T):
+            {
+                return DFW::ColourRGBA::Purple;
+            }
+            case(TetrominoType::S):
+            {
+                return DFW::ColourRGBA::Green;
+            }
+            case(TetrominoType::Z):
+            {
+                return DFW::ColourRGBA::Red;
+            }
+            default:
+            {
+                DFW_ASSERT(false);
+                return DFW::ColourRGBA();
             }
         }
     }
