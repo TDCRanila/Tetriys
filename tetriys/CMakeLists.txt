@@ -14,7 +14,6 @@ string(REPLACE "\\" "/" ALL_FILES       "${ALL_FILES}")
     
 ### Executable Definition
 set(EXE_NAME Tetriys)
-project(${EXE_NAME} VERSION 1.0.0)
 
 # Executable Source
 add_executable(${EXE_NAME})
