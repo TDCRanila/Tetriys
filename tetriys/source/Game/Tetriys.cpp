@@ -110,30 +110,27 @@ namespace Tetriys
         // Init Systems
         _ecs->Init();
 
-        auto& play_director             = _ecs->SystemManager().AddSystem<PlayDirector>();
-        auto& controller_system         = _ecs->SystemManager().AddSystem<GameControllerSystem>();
-        controller_system.ExecuteAfter(play_director);
-        auto& spawn_system = _ecs->SystemManager().AddSystem<SpawnSystem>();
-        spawn_system.ExecuteAfter(controller_system);
-        auto& playfield_control_system  = _ecs->SystemManager().AddSystem<PlayFieldControlSystem>();
-        playfield_control_system.ExecuteAfter(controller_system);
-        auto& tetromino_control_system  = _ecs->SystemManager().AddSystem<TetrominoControlSystem>();
-        tetromino_control_system.ExecuteAfter(playfield_control_system);
-        auto& gravity_system            = _ecs->SystemManager().AddSystem<GravitySystem>();
-        gravity_system.ExecuteAfter(tetromino_control_system);
-        auto& lock_system               = _ecs->SystemManager().AddSystem<LockTetrominoPlacementSystem>();
-        lock_system.ExecuteAfter(gravity_system);
 
 
-        auto& transform_system      = _ecs->SystemManager().AddSystem<DFW::TransformSystem>();
-        transform_system.ExecuteAfter(lock_system);
-        auto& camera_system         = _ecs->SystemManager().AddSystem<DFW::CameraSystem>();
-        camera_system.ExecuteAfter(transform_system);
-        auto& debug_render_system   = _ecs->SystemManager().AddSystem<DFW::DebugRenderSystem>();
-        debug_render_system.ExecuteAfter(transform_system);
-        auto& render_system         = _ecs->SystemManager().AddSystem<DFW::RenderSystem>();
-        render_system.ExecuteAfter(transform_system);
+        _ecs->SystemManager().AddSystem<PlayDirector>();
+        _ecs->SystemManager().AddSystem<GameControllerSystem>().ExecuteAfter<PlayDirector>();
+        _ecs->SystemManager().AddSystem<SpawnSystem>().ExecuteAfter<GameControllerSystem>();
+        _ecs->SystemManager().AddSystem<PlayFieldControlSystem>().ExecuteAfter<SpawnSystem>();
+        _ecs->SystemManager().AddSystem<TetrominoControlSystem>().ExecuteAfter<PlayFieldControlSystem>();
+        _ecs->SystemManager().AddSystem<GravitySystem>().ExecuteAfter<TetrominoControlSystem>();
+        _ecs->SystemManager().AddSystem<LockTetrominoPlacementSystem>().ExecuteAfter<GravitySystem>();
+        _ecs->SystemManager().AddSystem<LineClearSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();
+        _ecs->SystemManager().AddSystem<TetrominoPlacementVisualizerSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();
+        _ecs->SystemManager().AddSystem<GridVisualizerSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();
 
+        _ecs->SystemManager().AddSystem<Debug_PlayfieldDataVisualizerSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();
+        _ecs->SystemManager().AddSystem<Debug_TetrominoDebugColourSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();
+        
+        _ecs->SystemManager().AddSystem<DFW::TransformSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();;
+        _ecs->SystemManager().AddSystem<DFW::CameraSystem>().ExecuteAfter<DFW::TransformSystem>();
+        _ecs->SystemManager().AddSystem<DFW::RenderSystem>().ExecuteAfter<DFW::CameraSystem>();
+        _ecs->SystemManager().AddSystem<DFW::DebugRenderSystem>().ExecuteAfter<DFW::CameraSystem>();
+        
         _ecs->SystemManager().CalculateSystemDependencies();
     }
 
