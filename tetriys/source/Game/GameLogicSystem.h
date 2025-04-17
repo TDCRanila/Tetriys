@@ -109,5 +109,15 @@ namespace Tetriys
 
     };
 
+    class GridVisualizerSystem : public DFW::DECS::System::Registrar<GridVisualizerSystem>
+    {
+    public:
+        GridVisualizerSystem() = default;
+        virtual ~GridVisualizerSystem() = default;
+
+    private:
+        virtual void Update(DFW::DECS::EntityRegistry& a_registry);
+
+    };
 
 } // End of namespace ~ Tetriys.

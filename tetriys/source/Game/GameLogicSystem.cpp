@@ -398,4 +398,26 @@ namespace Tetriys
         }
     }
 
+    void GridVisualizerSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, transform_comp, playfield]
+            : a_registry.ENTT().view<DFW::TransformComponent, PlayField>().each())
+        {
+            glm::vec3 grid_center(0.0f);
+            grid_center.x = TETRIYS_GRID_WIDTH * TETRIYS_BLOCK_SPACING * 0.5f - 1.0f;
+            grid_center.y = TETRIYS_GRID_HEIGHT * TETRIYS_BLOCK_SPACING * 0.5f - 1.0f;
+            grid_center += transform_comp.GetWorldTranslation();
+
+            DFW::DebugDrawSettings const grid_draw_settings(DFW::ColourRGBA::DarkGrey);
+            DFW::DebugRenderSystem* debug_renderer = SystemManager().GetSystem<DFW::DebugRenderSystem>();
+            debug_renderer->DrawGrid(
+                  grid_center
+                , glm::vec3(0.0f, 0.0f, 1.0f)
+                , glm::ivec2(TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT)
+                , TETRIYS_BLOCK_SPACING
+                , grid_draw_settings
+            );
+        }
+    }
+
 } // End of namespace ~ Tetriys.
