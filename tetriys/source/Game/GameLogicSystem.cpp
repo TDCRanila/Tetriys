@@ -8,7 +8,6 @@
 #include <Game/PlacementComponent.h>
 #include <Game/GravityComponent.h>
 #include <Game/GameState.h>
-#include <Game/Control/TetrominoControlSystem.h>
 #include <Game/Control/TetrominoMovementComponent.h>
 #include <Game/Control/PlayfieldActions.h>
 
@@ -453,10 +452,10 @@ namespace Tetriys
             if (!tetromino_movement_comp.wants_to_be_held)
                 continue;
 
-            DFW::Entity tetromino(e, a_registry);
+            DFW::Entity tetromino_to_be_held(e, a_registry);
 
             // Check game PlayState if holding tetromino is allowed.
-            DFW::Entity game_entry = tetromino.GetParent();
+            DFW::Entity game_entry = tetromino_to_be_held.GetParent();
             PlayState& play_state = game_entry.GetComponent<GameStateComponent>().play_state;
             if (play_state != PlayState::PLACING)
                 continue;
@@ -475,10 +474,10 @@ namespace Tetriys
                 std::swap(spawn_bag.held_tetromino, *spawn_bag.bag_iterator);
             }
 
-            ECSEventHandler().Broadcast<TetrominoHeldEvent>(tetromino);
+            ECSEventHandler().InstantBroadcast<TetrominoHeldEvent>(tetromino_to_be_held);
 
             // Delete the already spawned tetromino.
-            DestroyTetromino(game_entry.GetComponent<PlayField>(), tetromino);
+            tetromino_to_be_held.DestroySelf();
 
             play_state = PlayState::HOLDING;
         }
