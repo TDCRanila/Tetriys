@@ -299,9 +299,7 @@ namespace Tetriys
             : a_registry.ENTT().view<GameStateComponent, GameNameIDComponent, PlayField>().each())
         {
             if (game_state_comp.play_state != PlayState::CHECKING_LINE_CLEARS)
-            {
-                break;
-            }
+                continue;
 
             int32 const maximum_possible_line_clears(4);
             std::vector<int32> full_row_indicies;
@@ -342,9 +340,7 @@ namespace Tetriys
 
             // Back out if there are no full rows.
             if (full_row_indicies.empty())
-            {
-                break;
-            }
+                continue;
 
             // Push rows down after line clear - start from high to low to try and reduce row swaps.
             std::ranges::sort(full_row_indicies, std::ranges::greater());
