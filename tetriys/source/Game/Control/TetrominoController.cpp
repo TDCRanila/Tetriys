@@ -56,4 +56,11 @@ namespace Tetriys
             QueueAction(DFW::MakeUnique<HardDropCommand>(_possessed_tetromino.GetComponent<TetrominoMovementComponent>()));
     }
 
+    void TetrominoController::HoldTetromino()
+    {
+        _possessed_tetromino.GetComponent<PlayFieldRef>();
+        if (_possessed_tetromino)
+            QueueAction(DFW::MakeUnique<HoldTetrominoCommand>(_possessed_tetromino.GetComponent<TetrominoMovementComponent>()));
+    }
+
 } // End of namespace ~ Tetriys.

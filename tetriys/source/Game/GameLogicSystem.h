@@ -120,4 +120,15 @@ namespace Tetriys
 
     };
 
+    class HoldTetrominoSystem : public DFW::DECS::System::Registrar<HoldTetrominoSystem>
+    {
+    public:
+        HoldTetrominoSystem() = default;
+        virtual ~HoldTetrominoSystem() = default;
+
+    private:
+        virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
+
+    };
+
 } // End of namespace ~ Tetriys.

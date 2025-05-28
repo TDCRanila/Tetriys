@@ -117,6 +117,7 @@ namespace Tetriys
         _ecs->SystemManager().AddSystem<SpawnSystem>().ExecuteAfter<GameControllerSystem>();
         _ecs->SystemManager().AddSystem<PlayFieldControlSystem>().ExecuteAfter<SpawnSystem>();
         _ecs->SystemManager().AddSystem<TetrominoControlSystem>().ExecuteAfter<PlayFieldControlSystem>();
+        _ecs->SystemManager().AddSystem<HoldTetrominoSystem>().ExecuteAfter<TetrominoControlSystem>();
         _ecs->SystemManager().AddSystem<GravitySystem>().ExecuteAfter<TetrominoControlSystem>();
         _ecs->SystemManager().AddSystem<LockTetrominoPlacementSystem>().ExecuteAfter<GravitySystem>();
         _ecs->SystemManager().AddSystem<LineClearSystem>().ExecuteAfter<LockTetrominoPlacementSystem>();

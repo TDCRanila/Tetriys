@@ -15,12 +15,14 @@ namespace Tetriys
     {
         ECSEventHandler().RegisterCallback<TetrominoPlacedEvent, &GameControllerSystem::OnTetrominoPlacedEvent>(this);
         ECSEventHandler().RegisterCallback<TetrominoSpawnedEvent, &GameControllerSystem::OnTetrominoSpawnedEvent>(this);
+        ECSEventHandler().RegisterCallback<TetrominoHeldEvent, &GameControllerSystem::OnTetrominoHeldEvent>(this);
     }
 
     void GameControllerSystem::Terminate(DFW::DECS::EntityRegistry& a_registry)
     {
         ECSEventHandler().UnregisterCallback<TetrominoPlacedEvent, &GameControllerSystem::OnTetrominoPlacedEvent>(this);
         ECSEventHandler().UnregisterCallback<TetrominoSpawnedEvent, &GameControllerSystem::OnTetrominoSpawnedEvent>(this);
+        ECSEventHandler().UnregisterCallback<TetrominoHeldEvent, &GameControllerSystem::OnTetrominoHeldEvent>(this);
     }
 
     void GameControllerSystem::Update(DFW::DECS::EntityRegistry& a_registry)
@@ -61,6 +63,11 @@ namespace Tetriys
                 {
                     tetromino_controller->Rotate(TetrominoRotation::Clockwise180);
                 }
+
+                if (input_system->IsKeyPressed(DFW::DInput::DKey::LEFT_SHIFT))
+                {
+                    tetromino_controller->HoldTetromino();
+                }
             }
         }
 
@@ -88,6 +95,15 @@ namespace Tetriys
                 tetromino_controller->PossessTetromino(a_event.spawned_tetromino);
             }
         }
+    }
+
+    void GameControllerSystem::OnTetrominoHeldEvent(TetrominoHeldEvent& a_event)
+    {
+        a_event.tetromino_to_be_held.DeleteComponent<TetrominoMovementComponent>();
+
+        DFW::ControllerNameID const& name_id = a_event.tetromino_to_be_held.GetComponent<PossessedByController>().controller_name_id;
+        if (DFW::SharedPtr<TetrominoController> const tetromino_controller = GetController<TetrominoController>(name_id))
+            tetromino_controller->ReleaseTetromino();
     }
 
 } // End of namespace ~ Tetriys.

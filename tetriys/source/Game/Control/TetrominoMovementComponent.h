@@ -15,6 +15,7 @@ namespace Tetriys
             desired_rotation_action(TetrominoRotation::None)
             , wants_to_soft_drop(false)
             , wants_to_hard_drop(false)
+            , wants_to_be_held(false)
             , is_strafing(false)
             , is_rotating(false)
             , is_dropping(false)
@@ -33,6 +34,7 @@ namespace Tetriys
         TetrominoRotation desired_rotation_action;
         bool wants_to_soft_drop;
         bool wants_to_hard_drop;
+        bool wants_to_be_held;
         
         bool is_strafing;
         bool is_rotating;

@@ -11,14 +11,17 @@ namespace Tetriys
     {
     public:
         TetrominoType const GetCurrentTetromino() const { return *bag_iterator; }
-        void NextTetromino() { bag_iterator++; }
+        void SelectNextTetromino() { bag_iterator++; }
+        void SelectPreviousTetromino() { bag_iterator--; }
         bool IsAtLastTetrominoPiece() const { return tetromino_bag.end() == bag_iterator; }
 
         void PrintTetrominoList() const;
 
     public:
-        std::array<TetrominoType, 7>::iterator bag_iterator;
         std::array<TetrominoType, 7> tetromino_bag = { TetrominoType::None };
+        std::array<TetrominoType, 7>::iterator bag_iterator;
+
+        TetrominoType held_tetromino = TetrominoType::None;
 
     };
 

@@ -8,6 +8,7 @@
 #include <Game/PlacementComponent.h>
 #include <Game/GravityComponent.h>
 #include <Game/GameState.h>
+#include <Game/Control/TetrominoControlSystem.h>
 #include <Game/Control/TetrominoMovementComponent.h>
 #include <Game/Control/PlayfieldActions.h>
 
@@ -43,7 +44,7 @@ namespace Tetriys
             tetromino = static_cast<TetrominoType>(tetromino_list[randomized_index_result]);
             tetromino_list.erase(tetromino_list.begin() + randomized_index_result);
 
-            a_spawn_bag.NextTetromino();
+            a_spawn_bag.SelectNextTetromino();
         }
 
         a_spawn_bag.bag_iterator = a_spawn_bag.tetromino_bag.begin();
@@ -142,9 +143,10 @@ namespace Tetriys
             switch (game_state_comp.play_state)
             {
                 case PlayState::STARTING:
+                case PlayState::HOLDING:
                 {
                     game_state_comp.play_state = PlayState::SPAWNING;
-                    break;
+                    continue;
                 }
             }
         }
@@ -286,7 +288,7 @@ namespace Tetriys
 
                 ECSEventHandler().Broadcast<TetrominoSpawnedEvent>(spawned_tetromino, game_id_comp.game_id);
 
-                spawn_bag_comp.NextTetromino();
+                spawn_bag_comp.SelectNextTetromino();
             }
         }
     }
@@ -445,6 +447,44 @@ namespace Tetriys
                 , TETRIYS_BLOCK_SPACING
                 , grid_draw_settings
             );
+        }
+    }
+
+    void HoldTetrominoSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, tetromino_movement_comp, playfield_reference] : a_registry.ENTT().view<TetrominoMovementComponent, PlayFieldRef>().each())
+        {
+            if (!tetromino_movement_comp.wants_to_be_held)
+                continue;
+
+            DFW::Entity tetromino(e, a_registry);
+
+            // Check game PlayState if holding tetromino is allowed.
+            DFW::Entity game_entry = tetromino.GetParent();
+            PlayState& play_state = game_entry.GetComponent<GameStateComponent>().play_state;
+            if (play_state != PlayState::PLACING)
+                continue;
+
+            // Store or Swap the already spawned tetromino (the previous tetromino in the bag).
+            TetrominoSpawnBag& spawn_bag = game_entry.GetComponent<TetrominoSpawnBag>();
+            if (spawn_bag.held_tetromino == TetrominoType::None)
+            {
+                spawn_bag.SelectPreviousTetromino();
+                spawn_bag.held_tetromino = spawn_bag.GetCurrentTetromino();
+                spawn_bag.SelectNextTetromino();
+            }
+            else
+            {
+                spawn_bag.SelectPreviousTetromino();
+                std::swap(spawn_bag.held_tetromino, *spawn_bag.bag_iterator);
+            }
+
+            ECSEventHandler().Broadcast<TetrominoHeldEvent>(tetromino);
+
+            // Delete the already spawned tetromino.
+            DestroyTetromino(game_entry.GetComponent<PlayField>(), tetromino);
+
+            play_state = PlayState::HOLDING;
         }
     }
 
