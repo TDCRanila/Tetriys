@@ -59,6 +59,7 @@ namespace Tetriys
             tetromino.SetName("Tetromino" + std::to_string(tetromino_count++));
 
             tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_registry, a_tetromino_type);
+            tetromino.GetComponent<DFW::TransformComponent>().SetTranslation(glm::vec3(-1000.f, -1000.f, -1000.f));
 
             return tetromino;
         }
