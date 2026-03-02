@@ -54,7 +54,7 @@ namespace Tetriys
             camera_system->ChangeCameraProjOrthographic(camera_component, 160.f, 90.f, DFW::ClipSpace(-100.f, 100.f), true);
             camera_system->RegisterCamera(camera_component, "camera-main");
             camera_system->SetActiveCamera("camera-main");
-            camera_system->EnableCameraControl(camera_component);
+            camera_system->EnableSimpleCameraControlMode();
         }
 
         _player_game = GameObjects::CreateGameEntry(*_ecs, "PlayerOne");
