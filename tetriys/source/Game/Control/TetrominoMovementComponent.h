@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Game/Control/TetrominoRotation.h>
-#include <Game/Control/PlayFieldActions.h>
+#include <Game/Control/PlayfieldActions.h>
 
 #include <DFW/Modules/ECS/Component.h>
 
