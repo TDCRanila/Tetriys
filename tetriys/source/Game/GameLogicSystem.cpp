@@ -445,6 +445,16 @@ namespace Tetriys
         }
     }
 
+    void HoldTetrominoSystem::Init(DFW::DECS::EntityRegistry& a_registry)
+    {
+        ECSEventHandler().RegisterCallback<TetrominoPlacedEvent, &HoldTetrominoSystem::OnTetrominoPlacedEvent>(this);
+    }
+
+    void HoldTetrominoSystem::Terminate(DFW::DECS::EntityRegistry& a_registry)
+    {
+        ECSEventHandler().UnregisterCallback<TetrominoPlacedEvent, &HoldTetrominoSystem::OnTetrominoPlacedEvent>(this);
+    }
+
     void HoldTetrominoSystem::Update(DFW::DECS::EntityRegistry& a_registry)
     {
         for (auto&& [e, tetromino_movement_comp, playfield_reference] : a_registry.ENTT().view<TetrominoMovementComponent, PlayFieldRef>().each())
@@ -460,8 +470,14 @@ namespace Tetriys
             if (play_state != PlayState::PLACING)
                 continue;
 
-            // Store or Swap the already spawned tetromino (the previous tetromino in the bag).
+            // Only allow to store a tetromino once per round.
             TetrominoSpawnBag& spawn_bag = game_entry.GetComponent<TetrominoSpawnBag>();
+            if (!spawn_bag.is_allowed_to_hold_tetromino)
+                continue;
+            
+            spawn_bag.is_allowed_to_hold_tetromino = false;
+
+            // Store or Swap the already spawned tetromino (the previous tetromino in the bag).
             if (spawn_bag.held_tetromino == TetrominoType::None)
             {
                 spawn_bag.SelectPreviousTetromino();
@@ -481,6 +497,12 @@ namespace Tetriys
 
             play_state = PlayState::HOLDING;
         }
+    }
+
+    void HoldTetrominoSystem::OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event)
+    {
+        DFW::Entity game_entry = a_event.placed_tetromino.GetParent();
+        game_entry.GetComponent<TetrominoSpawnBag>().is_allowed_to_hold_tetromino = true;
     }
 
 } // End of namespace ~ Tetriys.

@@ -127,7 +127,11 @@ namespace Tetriys
         virtual ~HoldTetrominoSystem() = default;
 
     private:
+        virtual void Init(DFW::DECS::EntityRegistry& a_registry) override;
+        virtual void Terminate(DFW::DECS::EntityRegistry& a_registry) override;
         virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
+
+        void OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event);
 
     };
 

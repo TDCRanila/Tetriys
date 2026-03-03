@@ -22,6 +22,7 @@ namespace Tetriys
         std::array<TetrominoType, 7>::iterator bag_iterator;
 
         TetrominoType held_tetromino = TetrominoType::None;
+        bool is_allowed_to_hold_tetromino = true;
 
     };
 
