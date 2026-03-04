@@ -39,6 +39,7 @@ namespace Tetriys
             PlayFieldDataEntry& data_entry = data[index];
             data_entry.grid_coordinate = glm::ivec2(GetXCoordinate(index), GetYCoordinate(index));
             data_entry.block_world_position = glm::vec3(data_entry.grid_coordinate.x * TETRIYS_BLOCK_SPACING, data_entry.grid_coordinate.y * TETRIYS_BLOCK_SPACING, 0.0f);
+            data_entry.block_world_position += GetOwner().GetComponent<DFW::TransformComponent>().GetTranslation();
         }
     }
 

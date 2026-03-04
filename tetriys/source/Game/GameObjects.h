@@ -4,6 +4,7 @@
 #include <Game/GameState.h>
 #include <Game/BlockComponent.h>
 #include <Game/TetrominoComponent.h>
+#include <Game/TetrominoSpawnBag.h>
 #include <Game/GameControllerSystem.h>
 #include <Game/Control/TetrominoController.h>
 
@@ -58,6 +59,7 @@ namespace Tetriys
             tetromino.SetName("Tetromino" + std::to_string(tetromino_count++));
 
             tetromino.AddComponent<TetrominoComponent>().ConstructTetromino(a_registry, a_tetromino_type);
+            tetromino.GetComponent<DFW::TransformComponent>().SetTranslation(glm::vec3(-1000.f, -1000.f, -1000.f));
 
             return tetromino;
         }
@@ -78,10 +80,14 @@ namespace Tetriys
 
             // Score Component
 
-            // Game/Playstate
+            // Game State
             player_game.AddComponent<GameStateComponent>().game_state = GameState::START_GAME;
             player_game.AddComponent<GameStateComponent>().play_state = PlayState::NONE;
             player_game.AddComponent<GameNameIDComponent>().game_id = a_game_id;
+            player_game.AddComponent<GameRNG>();
+
+            // Gameplay
+            player_game.AddComponent<TetrominoSpawnBag>();
 
             return player_game;
         }

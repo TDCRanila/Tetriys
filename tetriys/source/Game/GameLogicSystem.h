@@ -109,5 +109,30 @@ namespace Tetriys
 
     };
 
+    class GridVisualizerSystem : public DFW::DECS::System::Registrar<GridVisualizerSystem>
+    {
+    public:
+        GridVisualizerSystem() = default;
+        virtual ~GridVisualizerSystem() = default;
+
+    private:
+        virtual void Update(DFW::DECS::EntityRegistry& a_registry);
+
+    };
+
+    class HoldTetrominoSystem : public DFW::DECS::System::Registrar<HoldTetrominoSystem>
+    {
+    public:
+        HoldTetrominoSystem() = default;
+        virtual ~HoldTetrominoSystem() = default;
+
+    private:
+        virtual void Init(DFW::DECS::EntityRegistry& a_registry) override;
+        virtual void Terminate(DFW::DECS::EntityRegistry& a_registry) override;
+        virtual void Update(DFW::DECS::EntityRegistry& a_registry) override;
+
+        void OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event);
+
+    };
 
 } // End of namespace ~ Tetriys.

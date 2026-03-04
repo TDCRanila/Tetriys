@@ -2,6 +2,8 @@
 
 #include <DFW/Modules/ECS/Component.h>
 
+#include <boost/random/mersenne_twister.hpp>
+
 namespace Tetriys
 {
     enum class GameState
@@ -31,6 +33,13 @@ namespace Tetriys
 
         GameState game_state;
         PlayState play_state;
+    };
+
+    struct GameRNG : public DFW::DECS::Component::StrictRegistrar<GameRNG>
+    {
+        virtual ~GameRNG() = default;
+
+        boost::random::mt19937 rng_engine;
     };
 
     using GameNameID = std::string;

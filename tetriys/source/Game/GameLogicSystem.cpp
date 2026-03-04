@@ -3,6 +3,7 @@
 #include <Game/GameObjects.h>
 #include <Game/PlayField.h>
 #include <Game/TetrominoComponent.h>
+#include <Game/TetrominoSpawnBag.h>
 #include <Game/BlockComponent.h>
 #include <Game/PlacementComponent.h>
 #include <Game/GravityComponent.h>
@@ -21,11 +22,33 @@
 
 #include <DFW/GameWorld/Graphics/DebugRenderSystem.h>
 
+#include <boost/random/uniform_int_distribution.hpp>
+
 #include <ranges>
 #include <algorithm>
 
 namespace Tetriys
 {
+    void GenerateRandomizedSpawnBag(TetrominoSpawnBag& a_spawn_bag, GameRNG& a_rng)
+    {
+        a_spawn_bag.bag_iterator = a_spawn_bag.tetromino_bag.begin();
+
+        std::vector<int32> tetromino_list = { 1, 2, 3, 4, 5, 6, 7 };
+        while (tetromino_list.size() != 0)
+        {
+            boost::random::uniform_int_distribution<> distribution(0, tetromino_list.size() - 1);
+            int32 const randomized_index_result = distribution(a_rng.rng_engine);
+
+            TetrominoType& tetromino = *a_spawn_bag.bag_iterator;
+            tetromino = static_cast<TetrominoType>(tetromino_list[randomized_index_result]);
+            tetromino_list.erase(tetromino_list.begin() + randomized_index_result);
+
+            a_spawn_bag.SelectNextTetromino();
+        }
+
+        a_spawn_bag.bag_iterator = a_spawn_bag.tetromino_bag.begin();
+    }
+
     bool IsTetrominoBlockedAtCoordinate(TetrominoComponent const& a_tetromino, struct PlayField const& a_playfield, BlockCoordinate const& a_coordinate)
     {
         // Check at new coordinates if there are blocking blocks.
@@ -113,14 +136,16 @@ namespace Tetriys
             {
                 game_state_comp.game_state = GameState::PLAY_GAME;
                 game_state_comp.play_state = PlayState::STARTING;
+                continue;
             }
 
             switch (game_state_comp.play_state)
             {
                 case PlayState::STARTING:
+                case PlayState::HOLDING:
                 {
                     game_state_comp.play_state = PlayState::SPAWNING;
-                    break;
+                    continue;
                 }
             }
         }
@@ -238,20 +263,22 @@ namespace Tetriys
 
     void SpawnSystem::Update(DFW::DECS::EntityRegistry& a_registry)
     {
-        for (auto&& [e, game_state_comp, game_id_comp, playfield]
-            : a_registry.ENTT().view<GameStateComponent, GameNameIDComponent, PlayField>().each())
+        for (auto&& [e, game_state_comp, game_rng, game_id_comp, playfield, spawn_bag_comp]
+            : a_registry.ENTT().view<GameStateComponent, GameRNG, GameNameIDComponent, PlayField, TetrominoSpawnBag>().each())
         {
+            if (game_state_comp.play_state == PlayState::STARTING)
+            {
+                GenerateRandomizedSpawnBag(spawn_bag_comp, game_rng);
+            }
+
             if (game_state_comp.play_state == PlayState::SPAWNING)
             {
-                // TODO Implement proper tetromino spawnbag functionality.
-                static int32 test(0);
-                constexpr int32 num_tetromino_types(7);
-                if (test >= num_tetromino_types)
-                    test = 1;
-                else
-                    test++;
+                if (spawn_bag_comp.IsAtLastTetrominoPiece())
+                {
+                    GenerateRandomizedSpawnBag(spawn_bag_comp, game_rng);
+                }
 
-                DFW::Entity spawned_tetromino = GameObjects::CreateTetrominoEntity(a_registry, static_cast<TetrominoType>(test));
+                DFW::Entity spawned_tetromino = GameObjects::CreateTetrominoEntity(a_registry, spawn_bag_comp.GetCurrentTetromino());
                 spawned_tetromino.AddComponent<TetrminoInsertAction>(BlockCoordinate(5, 20));
                 spawned_tetromino.AddComponent<PlayFieldRef>(playfield);
 
@@ -259,6 +286,8 @@ namespace Tetriys
                 spawned_tetromino.SetParent(game_entry);
 
                 ECSEventHandler().Broadcast<TetrominoSpawnedEvent>(spawned_tetromino, game_id_comp.game_id);
+
+                spawn_bag_comp.SelectNextTetromino();
             }
         }
     }
@@ -269,9 +298,7 @@ namespace Tetriys
             : a_registry.ENTT().view<GameStateComponent, GameNameIDComponent, PlayField>().each())
         {
             if (game_state_comp.play_state != PlayState::CHECKING_LINE_CLEARS)
-            {
-                break;
-            }
+                continue;
 
             int32 const maximum_possible_line_clears(4);
             std::vector<int32> full_row_indicies;
@@ -312,9 +339,7 @@ namespace Tetriys
 
             // Back out if there are no full rows.
             if (full_row_indicies.empty())
-            {
-                break;
-            }
+                continue;
 
             // Push rows down after line clear - start from high to low to try and reduce row swaps.
             std::ranges::sort(full_row_indicies, std::ranges::greater());
@@ -396,6 +421,88 @@ namespace Tetriys
             debug_renderer->DrawCube(DFW::Transform(placement_world_coordinates[2]), TETRIYS_BLOCK_SPACING * 0.5f, draw_settings);
             debug_renderer->DrawCube(DFW::Transform(placement_world_coordinates[3]), TETRIYS_BLOCK_SPACING * 0.5f, draw_settings);
         }
+    }
+
+    void GridVisualizerSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, transform_comp, playfield]
+            : a_registry.ENTT().view<DFW::TransformComponent, PlayField>().each())
+        {
+            glm::vec3 grid_center(0.0f);
+            grid_center.x = TETRIYS_GRID_WIDTH * TETRIYS_BLOCK_SPACING * 0.5f - 1.0f;
+            grid_center.y = TETRIYS_GRID_HEIGHT * TETRIYS_BLOCK_SPACING * 0.5f - 1.0f;
+            grid_center += transform_comp.GetWorldTranslation();
+
+            DFW::DebugDrawSettings const grid_draw_settings(DFW::ColourRGBA::DarkGrey);
+            DFW::DebugRenderSystem* debug_renderer = SystemManager().GetSystem<DFW::DebugRenderSystem>();
+            debug_renderer->DrawGrid(
+                  grid_center
+                , glm::vec3(0.0f, 0.0f, 1.0f)
+                , glm::ivec2(TETRIYS_GRID_WIDTH, TETRIYS_GRID_HEIGHT)
+                , TETRIYS_BLOCK_SPACING
+                , grid_draw_settings
+            );
+        }
+    }
+
+    void HoldTetrominoSystem::Init(DFW::DECS::EntityRegistry& a_registry)
+    {
+        ECSEventHandler().RegisterCallback<TetrominoPlacedEvent, &HoldTetrominoSystem::OnTetrominoPlacedEvent>(this);
+    }
+
+    void HoldTetrominoSystem::Terminate(DFW::DECS::EntityRegistry& a_registry)
+    {
+        ECSEventHandler().UnregisterCallback<TetrominoPlacedEvent, &HoldTetrominoSystem::OnTetrominoPlacedEvent>(this);
+    }
+
+    void HoldTetrominoSystem::Update(DFW::DECS::EntityRegistry& a_registry)
+    {
+        for (auto&& [e, tetromino_movement_comp, playfield_reference] : a_registry.ENTT().view<TetrominoMovementComponent, PlayFieldRef>().each())
+        {
+            if (!tetromino_movement_comp.wants_to_be_held)
+                continue;
+
+            DFW::Entity tetromino_to_be_held(e, a_registry);
+
+            // Check game PlayState if holding tetromino is allowed.
+            DFW::Entity game_entry = tetromino_to_be_held.GetParent();
+            PlayState& play_state = game_entry.GetComponent<GameStateComponent>().play_state;
+            if (play_state != PlayState::PLACING)
+                continue;
+
+            // Only allow to store a tetromino once per round.
+            TetrominoSpawnBag& spawn_bag = game_entry.GetComponent<TetrominoSpawnBag>();
+            if (!spawn_bag.is_allowed_to_hold_tetromino)
+                continue;
+            
+            spawn_bag.is_allowed_to_hold_tetromino = false;
+
+            // Store or Swap the already spawned tetromino (the previous tetromino in the bag).
+            if (spawn_bag.held_tetromino == TetrominoType::None)
+            {
+                spawn_bag.SelectPreviousTetromino();
+                spawn_bag.held_tetromino = spawn_bag.GetCurrentTetromino();
+                spawn_bag.SelectNextTetromino();
+            }
+            else
+            {
+                spawn_bag.SelectPreviousTetromino();
+                std::swap(spawn_bag.held_tetromino, *spawn_bag.bag_iterator);
+            }
+
+            ECSEventHandler().InstantBroadcast<TetrominoHeldEvent>(tetromino_to_be_held);
+
+            // Delete the already spawned tetromino.
+            tetromino_to_be_held.DestroySelf();
+
+            play_state = PlayState::HOLDING;
+        }
+    }
+
+    void HoldTetrominoSystem::OnTetrominoPlacedEvent(TetrominoPlacedEvent& a_event)
+    {
+        DFW::Entity game_entry = a_event.placed_tetromino.GetParent();
+        game_entry.GetComponent<TetrominoSpawnBag>().is_allowed_to_hold_tetromino = true;
     }
 
 } // End of namespace ~ Tetriys.

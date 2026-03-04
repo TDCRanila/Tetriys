@@ -134,6 +134,8 @@ namespace Tetriys
         TetrominoComponent const& tetromino = a_tetromino.GetComponent<TetrominoComponent>();
         for (int32 index(0); index < tetromino.blocks.size(); index++)
             DestroyBlockInGrid(a_playfield, tetromino.block_components[index]->grid_coordinate);
+
+        a_tetromino.DestroySelf();
     }
 
     void RemoveTetromino(PlayField& a_playfield, DFW::Entity& a_tetromino)

@@ -518,6 +518,7 @@ FodyWeavers.xsd
 
 ### Project
 build
+build-output
 
 resources/logs
 resources/shaders/**/*.bin

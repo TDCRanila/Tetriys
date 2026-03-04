@@ -108,6 +108,19 @@ namespace Tetriys
             DFW::RefWrap<TetrominoMovementComponent> tetromino;
         };
 
+        class HoldTetrominoCommand : public DFW::Command
+        {
+        public:
+            HoldTetrominoCommand(TetrominoMovementComponent& a_tetromino) : tetromino(a_tetromino) {}
+
+            virtual void Execute() override
+            {
+                tetromino.get().wants_to_be_held = true;
+            }
+
+            DFW::RefWrap<TetrominoMovementComponent> tetromino;
+        };
+
     };
 
 
